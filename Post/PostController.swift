@@ -69,10 +69,10 @@ class PostController {
 					return
 			}
 			
-			let posts = postDictionaries.flatMap({Post(json: $0.1, identifier: $0.0)})
-			let sortedPosts = posts.sorted(by: {$0.0.timestamp > $0.1.timestamp})
+			let posts = postDictionaries.flatMap { Post(json: $0.1, identifier: $0.0) }
+			let sortedPosts = posts.sorted(by: { $0.0.timestamp > $0.1.timestamp })
 			
-			DispatchQueue.main.async(execute: {
+			DispatchQueue.main.async {
 				
 				if reset {
 					self.posts = sortedPosts
@@ -81,9 +81,7 @@ class PostController {
 				}
 				
 				completion?(sortedPosts)
-				
-				return
-			})
+			}
 		}
 	}
 	
