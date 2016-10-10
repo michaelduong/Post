@@ -128,7 +128,7 @@ class PostListTableViewController: UITableViewController {
 
 extension PostListTableViewController: PostControllerDelegate {
 	
-    func postsUpdated(_ posts: [Post]) {
+	func postsWereUpdatedTo(posts: [Post], on postController: PostController) {
         
         tableView.reloadData()
         

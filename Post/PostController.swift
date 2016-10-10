@@ -93,12 +93,12 @@ class PostController {
 	
 	var posts: [Post] = [] {
 		didSet {
-			delegate?.postsUpdated(posts)
+			delegate?.postsWereUpdatedTo(posts: posts, on: self)
 		}
 	}
 }
 
 protocol PostControllerDelegate: class {
 	
-	func postsUpdated(_ posts: [Post])
+	func postsWereUpdatedTo(posts: [Post], on postController: PostController)
 }
