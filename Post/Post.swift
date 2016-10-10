@@ -10,21 +10,21 @@ import Foundation
 
 struct Post {
     
-    private let UsernameKey = "username"
-    private let TextKey = "text"
-    private let TimestampKey = "timestamp"
-    private let UUIDKey = "uuid"
+    fileprivate let UsernameKey = "username"
+    fileprivate let TextKey = "text"
+    fileprivate let TimestampKey = "timestamp"
+    fileprivate let UUIDKey = "uuid"
 
 	/* FIXME: This makes me cringe a little. We should do better. -Andrew */
-    var endpoint: NSURL? {
-        return PostController.baseURL?.URLByAppendingPathComponent(self.identifier.UUIDString)!.URLByAppendingPathExtension("json")
+    var endpoint: URL? {
+        return PostController.baseURL?.appendingPathComponent(self.identifier.uuidString).appendingPathExtension("json")
     }
 	
-    init(username: String, text: String, identifier: NSUUID = NSUUID()) {
+    init(username: String, text: String, identifier: UUID = UUID()) {
         
         self.username = username
         self.text = text
-        self.timestamp = NSDate().timeIntervalSince1970
+        self.timestamp = Date().timeIntervalSince1970
         self.identifier = identifier
     }
 	
@@ -32,10 +32,10 @@ struct Post {
 	
 	let username: String
 	let text: String
-	let timestamp: NSTimeInterval
-	let identifier: NSUUID
+	let timestamp: TimeInterval
+	let identifier: UUID
 	
-	var queryTimestamp: NSTimeInterval {
+	var queryTimestamp: TimeInterval {
 		return timestamp - 0.000001
 	}
 }
@@ -49,27 +49,27 @@ extension Post {
 		guard let username = json[UsernameKey] as? String,
 			let text = json[TextKey] as? String,
 			let timestamp = json[TimestampKey] as? Double,
-			let identifier = NSUUID(UUIDString: identifier) else { return nil }
+			let identifier = UUID(uuidString: identifier) else { return nil }
 		
 		self.username = username
 		self.text = text
-		self.timestamp = NSTimeInterval(floatLiteral: timestamp)
+		self.timestamp = TimeInterval(floatLiteral: timestamp)
 		self.identifier = identifier
 	}
 	
-	var jsonValue: [String: AnyObject] {
+	var jsonRepresentation: [String: Any] {
 		
-		let json: [String: AnyObject] = [
-			UsernameKey: self.username,
-			TextKey: self.text,
-			TimestampKey: self.timestamp,
+		let json: [String: Any] = [
+			UsernameKey: username,
+			TextKey: text,
+			TimestampKey: timestamp,
 			]
 		
 		return json
 	}
 	
-	var jsonData: NSData? {
+	var jsonData: Data? {
 		
-		return try? NSJSONSerialization.dataWithJSONObject(self.jsonValue, options: NSJSONWritingOptions.PrettyPrinted)
+		return try? JSONSerialization.data(withJSONObject: jsonRepresentation, options: [.prettyPrinted])
 	}
 }

@@ -9,87 +9,83 @@
 import Foundation
 
 class PostController {
-    
-    static let baseURL = NSURL(string: "https://devmtn-post.firebaseio.com/posts/")
-    static let endpoint = baseURL?.URLByAppendingPathExtension("json")
 	
-    init() {
-        fetchPosts()
-    }
-    
-    // MARK: Save Post
-    
-    func addPost(username: String, text: String) {
-        
-        let post = Post(username: username, text: text)
-        
-        guard let requestURL = post.endpoint else { fatalError("URL optional is nil") }
-        
-        NetworkController.performRequestForURL(requestURL, httpMethod: .Put, body: post.jsonData) { (data, error) in
-            
-            let responseDataString = NSString(data: data!, encoding: NSUTF8StringEncoding) ?? ""
-            
-            if error != nil {
-                print("Error: \(error)")
-            } else if responseDataString.containsString("error") {
-                print("Error: \(responseDataString)")
-            } else {
-                print("Successfully saved data to endpoint. \nResponse: \(responseDataString)")
-            }
-            
-            self.fetchPosts()
-        }
-    }
-    
-    // MARK: Request
-    
-    func fetchPosts(reset reset: Bool = true, completion: ((newPosts: [Post]) -> Void)? = nil) {
-    
-        guard let requestURL = PostController.endpoint else { fatalError("Post Endpoint url failed") }
-        
-        let queryEndInterval = reset ? NSDate().timeIntervalSince1970 : posts.last?.queryTimestamp ?? NSDate().timeIntervalSince1970
-        
-        //TODO update to query timestamp
-        
-        let urlParameters = [
-            "orderBy": "\"timestamp\"",
-            "endAt": "\(queryEndInterval)",
-            "limitToLast": "15",
-            ]
-        
-        NetworkController.performRequestForURL(requestURL, httpMethod: .Get, urlParameters: urlParameters) { (data, error) in
-        
-            let responseDataString = NSString(data: data!, encoding: NSUTF8StringEncoding)
-            
-            guard let data = data,
-                let postDictionaries = (try? NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)) as? [String: [String: AnyObject]] else {
-                    
-                    print("Unable to serialize JSON. \nResponse: \(responseDataString)")
-                    if let completion = completion {
-                        completion(newPosts: [])
-                    }
-                    return
-            }
-            
-            let posts = postDictionaries.flatMap({Post(json: $0.1, identifier: $0.0)})
-            let sortedPosts = posts.sort({$0.0.timestamp > $0.1.timestamp})
-            
-            dispatch_async(dispatch_get_main_queue(), {
-                
-                if reset {
-                    self.posts = sortedPosts
-                } else {
-                    self.posts.appendContentsOf(sortedPosts)
-                }
-                
-                if let completion = completion {
-                    completion(newPosts: sortedPosts)
-                }
-                
-                return
-            })
-        }
-    }
+	static let baseURL = URL(string: "https://devmtn-post.firebaseio.com/posts/")
+	static let endpoint = baseURL?.appendingPathExtension("json")
+	
+	init() {
+		fetchPosts()
+	}
+	
+	// MARK: Save Post
+	
+	func addNewPostWith(username: String, text: String) {
+		
+		let post = Post(username: username, text: text)
+		
+		guard let requestURL = post.endpoint else { fatalError("URL optional is nil") }
+		
+		NetworkController.performRequest(for: requestURL, httpMethod: .Put, body: post.jsonData)  { (data, error) in
+			
+			let responseDataString = String(data: data!, encoding: .utf8) ?? ""
+			
+			if error != nil {
+				print("Error: \(error)")
+			} else if responseDataString.contains("error") {
+				print("Error: \(responseDataString)")
+			} else {
+				print("Successfully saved data to endpoint. \nResponse: \(responseDataString)")
+			}
+			
+			self.fetchPosts()
+		}
+	}
+	
+	// MARK: Request
+	
+	func fetchPosts(reset: Bool = true, completion: (([Post]) -> Void)? = nil) {
+		
+		guard let requestURL = PostController.endpoint else { fatalError("Post Endpoint url failed") }
+		
+		let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970
+		
+		//TODO update to query timestamp
+		
+		let urlParameters = [
+			"orderBy": "\"timestamp\"",
+			"endAt": "\(queryEndInterval)",
+			"limitToLast": "15",
+			]
+		
+		NetworkController.performRequest(for: requestURL, httpMethod: .Get, urlParameters: urlParameters) { (data, error) in
+			
+			let responseDataString = String(data: data!, encoding: .utf8)
+			
+			guard let data = data,
+				let postDictionaries = (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)) as? [String: [String: AnyObject]] else {
+					
+					NSLog("Unable to deserialize JSON. \nResponse: \(responseDataString)")
+					completion?([])
+					return
+			}
+			
+			let posts = postDictionaries.flatMap({Post(json: $0.1, identifier: $0.0)})
+			let sortedPosts = posts.sorted(by: {$0.0.timestamp > $0.1.timestamp})
+			
+			DispatchQueue.main.async(execute: {
+				
+				if reset {
+					self.posts = sortedPosts
+				} else {
+					self.posts.append(contentsOf: sortedPosts)
+				}
+				
+				completion?(sortedPosts)
+				
+				return
+			})
+		}
+	}
 	
 	// MARK: Properties
 	
@@ -103,6 +99,6 @@ class PostController {
 }
 
 protocol PostControllerDelegate: class {
-    
-    func postsUpdated(posts: [Post])
+	
+	func postsUpdated(_ posts: [Post])
 }
