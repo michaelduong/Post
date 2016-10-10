@@ -11,30 +11,11 @@
 		686131F01CD92A0B00A46449 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 686131EE1CD92A0B00A46449 /* Main.storyboard */; };
 		686131F21CD92A0B00A46449 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 686131F11CD92A0B00A46449 /* Assets.xcassets */; };
 		686131F51CD92A0B00A46449 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 686131F31CD92A0B00A46449 /* LaunchScreen.storyboard */; };
-		686132001CD92A0B00A46449 /* PostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686131FF1CD92A0B00A46449 /* PostTests.swift */; };
-		6861320B1CD92A0B00A46449 /* PostUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6861320A1CD92A0B00A46449 /* PostUITests.swift */; };
 		686132191CD92A5500A46449 /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686132181CD92A5500A46449 /* NetworkController.swift */; };
 		68D7B2B81CEA4AB500AC1655 /* PostListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68D7B2B71CEA4AB500AC1655 /* PostListTableViewController.swift */; };
 		68D7B2BA1CEA7CED00AC1655 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68D7B2B91CEA7CED00AC1655 /* Post.swift */; };
 		68D7B2BE1CEA7F9D00AC1655 /* PostController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68D7B2BD1CEA7F9D00AC1655 /* PostController.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		686131FC1CD92A0B00A46449 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 686131DF1CD92A0B00A46449 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 686131E61CD92A0B00A46449;
-			remoteInfo = Post;
-		};
-		686132071CD92A0B00A46449 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 686131DF1CD92A0B00A46449 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 686131E61CD92A0B00A46449;
-			remoteInfo = Post;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		686131E71CD92A0B00A46449 /* Post.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Post.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -43,12 +24,6 @@
 		686131F11CD92A0B00A46449 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		686131F41CD92A0B00A46449 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		686131F61CD92A0B00A46449 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		686131FB1CD92A0B00A46449 /* PostTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PostTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		686131FF1CD92A0B00A46449 /* PostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostTests.swift; sourceTree = "<group>"; };
-		686132011CD92A0B00A46449 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		686132061CD92A0B00A46449 /* PostUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6861320A1CD92A0B00A46449 /* PostUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostUITests.swift; sourceTree = "<group>"; };
-		6861320C1CD92A0B00A46449 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		686132181CD92A5500A46449 /* NetworkController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkController.swift; sourceTree = "<group>"; };
 		68D7B2B71CEA4AB500AC1655 /* PostListTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostListTableViewController.swift; sourceTree = "<group>"; };
 		68D7B2B91CEA7CED00AC1655 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
@@ -63,20 +38,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		686131F81CD92A0B00A46449 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		686132031CD92A0B00A46449 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -84,8 +45,6 @@
 			isa = PBXGroup;
 			children = (
 				686131E91CD92A0B00A46449 /* Post */,
-				686131FE1CD92A0B00A46449 /* PostTests */,
-				686132091CD92A0B00A46449 /* PostUITests */,
 				686131E81CD92A0B00A46449 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,8 +53,6 @@
 			isa = PBXGroup;
 			children = (
 				686131E71CD92A0B00A46449 /* Post.app */,
-				686131FB1CD92A0B00A46449 /* PostTests.xctest */,
-				686132061CD92A0B00A46449 /* PostUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -114,24 +71,6 @@
 				686131F61CD92A0B00A46449 /* Info.plist */,
 			);
 			path = Post;
-			sourceTree = "<group>";
-		};
-		686131FE1CD92A0B00A46449 /* PostTests */ = {
-			isa = PBXGroup;
-			children = (
-				686131FF1CD92A0B00A46449 /* PostTests.swift */,
-				686132011CD92A0B00A46449 /* Info.plist */,
-			);
-			path = PostTests;
-			sourceTree = "<group>";
-		};
-		686132091CD92A0B00A46449 /* PostUITests */ = {
-			isa = PBXGroup;
-			children = (
-				6861320A1CD92A0B00A46449 /* PostUITests.swift */,
-				6861320C1CD92A0B00A46449 /* Info.plist */,
-			);
-			path = PostUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -154,42 +93,6 @@
 			productReference = 686131E71CD92A0B00A46449 /* Post.app */;
 			productType = "com.apple.product-type.application";
 		};
-		686131FA1CD92A0B00A46449 /* PostTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 686132121CD92A0B00A46449 /* Build configuration list for PBXNativeTarget "PostTests" */;
-			buildPhases = (
-				686131F71CD92A0B00A46449 /* Sources */,
-				686131F81CD92A0B00A46449 /* Frameworks */,
-				686131F91CD92A0B00A46449 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				686131FD1CD92A0B00A46449 /* PBXTargetDependency */,
-			);
-			name = PostTests;
-			productName = PostTests;
-			productReference = 686131FB1CD92A0B00A46449 /* PostTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		686132051CD92A0B00A46449 /* PostUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 686132151CD92A0B00A46449 /* Build configuration list for PBXNativeTarget "PostUITests" */;
-			buildPhases = (
-				686132021CD92A0B00A46449 /* Sources */,
-				686132031CD92A0B00A46449 /* Frameworks */,
-				686132041CD92A0B00A46449 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				686132081CD92A0B00A46449 /* PBXTargetDependency */,
-			);
-			name = PostUITests;
-			productName = PostUITests;
-			productReference = 686132061CD92A0B00A46449 /* PostUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -203,14 +106,6 @@
 					686131E61CD92A0B00A46449 = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = 357NQPN89X;
-					};
-					686131FA1CD92A0B00A46449 = {
-						CreatedOnToolsVersion = 7.3;
-						TestTargetID = 686131E61CD92A0B00A46449;
-					};
-					686132051CD92A0B00A46449 = {
-						CreatedOnToolsVersion = 7.3;
-						TestTargetID = 686131E61CD92A0B00A46449;
 					};
 				};
 			};
@@ -228,8 +123,6 @@
 			projectRoot = "";
 			targets = (
 				686131E61CD92A0B00A46449 /* Post */,
-				686131FA1CD92A0B00A46449 /* PostTests */,
-				686132051CD92A0B00A46449 /* PostUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -242,20 +135,6 @@
 				686131F51CD92A0B00A46449 /* LaunchScreen.storyboard in Resources */,
 				686131F21CD92A0B00A46449 /* Assets.xcassets in Resources */,
 				686131F01CD92A0B00A46449 /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		686131F91CD92A0B00A46449 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		686132041CD92A0B00A46449 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,36 +153,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		686131F71CD92A0B00A46449 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				686132001CD92A0B00A46449 /* PostTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		686132021CD92A0B00A46449 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6861320B1CD92A0B00A46449 /* PostUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		686131FD1CD92A0B00A46449 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 686131E61CD92A0B00A46449 /* Post */;
-			targetProxy = 686131FC1CD92A0B00A46449 /* PBXContainerItemProxy */;
-		};
-		686132081CD92A0B00A46449 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 686131E61CD92A0B00A46449 /* Post */;
-			targetProxy = 686132071CD92A0B00A46449 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		686131EE1CD92A0B00A46449 /* Main.storyboard */ = {
@@ -434,52 +284,6 @@
 			};
 			name = Release;
 		};
-		686132131CD92A0B00A46449 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = PostTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.devmtn.PostTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Post.app/Post";
-			};
-			name = Debug;
-		};
-		686132141CD92A0B00A46449 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				INFOPLIST_FILE = PostTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.devmtn.PostTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Post.app/Post";
-			};
-			name = Release;
-		};
-		686132161CD92A0B00A46449 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = PostUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.devmtn.PostUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = Post;
-			};
-			name = Debug;
-		};
-		686132171CD92A0B00A46449 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = PostUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.devmtn.PostUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = Post;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -497,24 +301,6 @@
 			buildConfigurations = (
 				686132101CD92A0B00A46449 /* Debug */,
 				686132111CD92A0B00A46449 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		686132121CD92A0B00A46449 /* Build configuration list for PBXNativeTarget "PostTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				686132131CD92A0B00A46449 /* Debug */,
-				686132141CD92A0B00A46449 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		686132151CD92A0B00A46449 /* Build configuration list for PBXNativeTarget "PostUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				686132161CD92A0B00A46449 /* Debug */,
-				686132171CD92A0B00A46449 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
