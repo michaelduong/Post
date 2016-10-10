@@ -31,41 +31,39 @@ Build the network controller, post model object, post controller, and post list 
 
 ### Network Controller
 
-Create a `NetworkController` class. This will have methods to build the different URLs you might want and it should have a method to return NSData from a URL. 
+Create a `NetworkController` class. This will have methods to build the different URLs you might want and it should have a method to return `Data` from a URL. 
 
-The `NetworkController` will be responsible for building URLs and executing  HTTP requests. Build the `NetworkController` to support different HTTP methods (GET, PUT, POST, PATCH, DELETE), and keep things generic such that you could use the same `NetworkController` in future projects if desired.
+The `NetworkController` will be responsible for building URLs and executing HTTP requests. Build the `NetworkController` to support different HTTP methods (GET, PUT, POST, PATCH, DELETE), and keep things generic such that you could use the same `NetworkController` in future projects if desired.
 
 It is good practice to write reusable code. Even when you do not plan to reuse the class in future projects, it will help you keep the roles of your types properly separated. In this specific case, it is good practice for the `NetworkController` to not know anything about the project's model or controller types.
 
 1. Write a `String` typed `enum` called `HTTPMethod`. You will use this enum to classify our HTTP requests as GET, PUT, POST, PATCH, or DELETE requests. Add cases for each.
     * example: `case Get = "GET"`
-2. Write a function signature `performRequestForURL` that will take an `NSURL`, an `HTTPMethod`, an optional `[String: String]` dictionary of URL parameters, an optional `NSData` request body, and an optional completion closure. The completion closure should include a `NSData?` data parameter and an `NSError?` error parameter, and the should return `Void`. 
+2. Write a function signature `performRequest(for url: ...)` that will take a `URL`, an `HTTPMethod`, an optional `[String: String]` dictionary of URL parameters, an optional `Data` request body, and an optional completion closure. The completion closure should include a `Data?` data parameter and an `Error?` error parameter, and the should return `Void`. 
     * note: At this point, it is OK if you do not understand why you are including each parameter. Spend some time contemplating each parameter and why you would include it in this function. For example: An HTTP request is made up of a URL, and an HTTP Method. Certain requests need URL parameters. Certain POST or PUT requests can carry a body. The completion closure is included so you know when the request is complete.
-3. Add the following `urlFromURLParameters` function to your `NetworkController` class. This function takes a base URL, URL parameters, and returns a completed URL with the parameters in place.
+3. Add the following `url(byAdding parameters: ...)` function to your `NetworkController` class. This function takes URL parameters, a base URL, and returns a completed URL with the parameters in place.
     * example: To perform a Google Search, you use the URL `https://google.com/search?q=test`. 'q' and 'test' are URL parameters, with 'q' being the name, and 'test' beging the value. This function will take the base URL `https://google.com/search` and a `[String: String]` dictionary `["q":"test"]`, and return the URL `https://google.com/search?q=test`
 
 ```swift
-    static func urlFromURLParameters(url: NSURL, urlParameters: [String: String]?) -> NSURL {
+    static func url(byAdding parameters: [String: String], to url: URL) -> URL {
         
-        let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: true)
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+        components?.queryItems = parameters.flatMap({URLQueryItem(name: $0.0, value: $0.1)})
         
-        components?.queryItems = urlParameters?.flatMap({NSURLQueryItem(name: $0.0, value: $0.1)})
-        
-        if let url = components?.URL {
-            return url
-        } else {
-            fatalError("URL optional is nil")
-        }
+        guard let url = components?.url else { 
+            fatalError("URL optional is nil") 
+        } 
+        return url
     }
 ```
 
-4. Implement the `performRequestforURL` function.
-    * Use the `urlFromURLParameters` to get a requestURL.
-    * Creating a new `NSMutableURLRequest`, set the HTTP method, set the body.
+4. Implement the `performRequest(for url: ...)` function.
+    * Use the `url(byAdding parameters: ...)` to get a requestURL.
+    * Creating a new `URLRequest`, set the HTTP method, set the body.
     * Generate and start the data task.
     * Calling the completion when the data task completes.
 
-This method will make the network call and call the completion closer with the `NSData?` result. If successful, `NSData?` will contain the response, if unsuccessful, `NSData?` will be nil. The class or function that calls this function will need to handle nil data.
+This method will make the network call and call the completion closer with the `Data?` result. If successful, `Data?` will contain the response, if unsuccessful, `Data?` will be nil. The class or function that calls this function will need to handle nil data.
 
 5. Use a Playground to test your network controller method with a sample endpoint from the [Post API](https://devmtn-post.firebaseio.com/posts.json) to see if you are getting data returned.
 
@@ -85,9 +83,9 @@ Create a model object that will represent the `Post` objects that are listed in 
 3. Using this information, add properties on `Post`.
     * `let username: String`
     * `let text: String`
-    * `let timestamp: NSTimeInterval`
-    * `let identifier: NSUUID`
-    * note: UUID stands for Universal Unique Identifier, the `Foundation` framework comes with an `NSUUID` class that helps generate and initialize `NSUUID`s from strings. Review the [Class Reference](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSUUID_Class/) to review how to create a new UUID, extract the string value, and initalize an `NSUUID` from a `String`. 
+    * `let timestamp: TimeInterval`
+    * `let identifier: UUID`
+    * note: UUID stands for Universal Unique Identifier, the `Foundation` framework comes with an `UUID` class that helps generate and initialize `UUID`s from strings. Review the [Class Reference](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSUUID_Class/) to review how to create a new UUID, extract the string value, and initalize an `UUID` from a `String`. 
 4. Create a memberwise initializer that takes parameters for the `username` and `text`. Optionally, add parameters for the `identifier` and `timestamp`, but set default values for them.
     * note: This memberwise initializer will only be used locally to generate new model objects. You can safely assume that initializing a new `Post` model object will require a new UUID for the `identifier`, and will use the `.timeIntervalSince1970` from the current date for the `timestamp`.
 4. Create a failable initializer function with a parameter of a JSON dictionary (`[String: AnyObject]`) and an identifier (`String`). This is the method you will use to initialize your `Post` object from a JSON dictionary. Remember to use a sample endpoint to inspect the JSON you will get back and the keys you will use to get each piece of data. Guard against required values, and return `nil` if all required information for a post is not available.
@@ -106,27 +104,27 @@ Because you will only use one View Controller in this project, there is no reaso
 2. Add a static constant `endpoint` for the `PostController` to know where to fetch `Post` objects from. Use the `baseURL` and `urlByAppending...` functions to build the correct endpoint for the API to fetch posts. This URL will be passed to our `NetworkController` when you want to fetch posts.
 3. Add a `posts` property that will hold the `Post` objects that you pull and serialize from the API.
 4. Add a method `fetchPosts` that provides an array of `Post` objects through an optional completion closure.
-    * This method should call the `NetworkController` `performRequestforURL` method to get the NSData at the endpoint URL.
-    * In the closure of the `performRequestforURL`, guard for data and `postDictionaries` by serializing the JSON using `NSJsonSerialization`. You will need to use the `try?` keyword to use `NSJSONSerialization` to serialize the `NSData`. Note that the API returns a Dictionary with UUID Strings as the keys, and the [String: AnyObject] representation as the value for each key. If the guard fails, print an error message, run the optional completion, and return from the function.
+    * This method should call the `NetworkController` `performRequestforURL` method to get the Data at the endpoint URL.
+    * In the closure of the `performRequest(for:...)`, guard for data and `postDictionaries` by serializing the JSON using `JSONSerialization`. You will need to use the `try` keyword to use `JSONSerialization` to serialize the `Data`. Note that the API returns a Dictionary with UUID Strings as the keys, and the [String: AnyObject] representation as the value for each key. If the guard fails, print an error message, run the optional completion, and return from the function.
         * note: The syntax for this function can be very difficult. Do your best to complete this without looking at the solution code.
         * note: You _must_ run your closure even if the data is unavailable, otherwise the object that calls this function will be waiting for a response forever.
-        * note: You can use `NSString(data: data!, encoding: NSUTF8StringEncoding)` to capture and print a readable representation of the returned data.
-    * If the NSData can be serialized, initialize the `Post` objects and call the completion closure with the populated array. (Hint: Use a for loop or `.flatMap()` to iterate through the dictionaries and initialize a new array of `Post` objects.)
+        * note: You can use `String(data: data!, encoding: .utf8)` to capture and print a readable representation of the returned data.
+    * If the Data can be serialized, initialize the `Post` objects and call the completion closure with the populated array. (Hint: Use a for loop or `.flatMap()` to iterate through the dictionaries and initialize a new array of `Post` objects.)
         * note: Because Dictionaries are unsorted, the `[Post]` you generated in this step will not be in any logical order.
     * Use the `.sort()` function to sort the posts by the `timestamp` property in reverse chronological order.
     * Set `self.posts` to the sorted posts.
     * Unwrap the completion and run the closure with the sorted posts as the parameter.
     * Because a primary use case for `fetchPosts` will be to reload the user interface when the request is finished, use Grand Central Dispatch to force the completion closure to run on the main thread. (Hint: `dispatch_async`)
 
-There are many different patterns and techniques to serialize JSON data into Model objects. Feel free to experiment with different techniques to get at the `[String: AnyObject]` dictionaries within the NSData returned from the `NSURLSessionDataTask`. 
+There are many different patterns and techniques to serialize JSON data into Model objects. Feel free to experiment with different techniques to get at the `[String: AnyObject]` dictionaries within the Data returned from the `URLSessionDataTask`. 
 
 At this point you should be able to pull the `Post` data from the API and serialize a list of `Post` objects. Test this functionality with a Playground or in your App Delegate by trying to print the results for a state to the console.
 
 5. Because you will always want to `fetchPosts()` whenever you initialize the `PostController`, add an `init()` function and call `fetchPosts()`. This will start the call to fetch posts and assign them to the `.posts` property.
 6. Other classes that use the `PostController` will be interested to know whenever the `posts` property is updated. Implement the delegate pattern to allow the `PostController` to notify an observer of updates to the `posts` property.
-    * Add a `PostControllerDelegate` protocol with a `postsUpdated` function that with a parameter that will be used to pass an array of the posts.
-    * Add an optional, youak `delegate` variable that conforms to the `PostControllerDelegate` protocol.
-    * Use the `didSet` function on the `posts` variable to call the `postsUpdated` function on the delegate.
+    * Add a `PostControllerDelegate` protocol with a `postsWereUpdatedTo(posts:, on postController:)` function with a parameter that will be used to pass an array of the posts.
+    * Add an optional, weak `delegate` variable that conforms to the `PostControllerDelegate` protocol.
+    * Use the `didSet` property observer on the `posts` variable to call the `postsWereUpdatedTo()` function on the delegate.
 
 ### Post List View Controller
 
@@ -146,7 +144,7 @@ Build a view that lists all posts. Implement dynamic height for the cells so tha
 Adopt the `PostControllerDelegate` protocol to observe the `.posts` property on the `PostController` to reload the tableview when there are new results.
 
 1. Adopt the `PostControllerDelegate` protocol
-2. Implement the required `postsUpdated` function by reloading the table view
+2. Implement the required `postsWereUpdatedTo()` function by reloading the table view
 
 #### Dynamic Cell Height
 
@@ -174,19 +172,19 @@ It is good practice to let the user know that a network request is processing. T
 
 ### Black Diamonds
 
-* Use a computed `.date` property, `NSDateComponent`s and `NSDateFormatter`s to display the `Post` date in the correct time zone
+* Use a computed `.date` property, `DateComponent`s and `DateFormatter`s to display the `Post` date in the correct time zone
 * Make your table view more efficient by inserting cells for new posts instead of reloading the entire tableview
 
 ## Part Two - Alert Controllers, Network Controller (HTTP POST), Paging Requests and Table View
 
-* use NSURLSession to make asynchronous POST HTTP requests
+* use URLSession to make asynchronous POST HTTP requests
 * build custom table views that support paging through network requests
 
 Build functionality to allow the user to submit new posts to the feed. Make the network requests more efficient by adding paging functionality to the Post Controller. Update the table view to support paging.
 
 ### Review the NetworkController
 
-Note that you already built the `NetworkController` to support PUT requests. Review the code and `NSURLSession` to review how you wrote the code that supports both GET, PUT, and other HTTP requests.
+Note that you already built the `NetworkController` to support PUT requests. Review the code and `URLSession` to review how you wrote the code that supports both GET, PUT, and other HTTP requests.
 
 ### Add Posting Functionality to the Post type
 
@@ -195,8 +193,8 @@ Update the `Post` type with an `endpoint` and a `jsonValue` that will be used to
 1. Add an `endpoint` computed property. Append the `.identifier` string value and '.json' to the `PostController.baseURL` to return the URL for the HTTP request.
 2. Add a `jsonValue` computed property that returns a `[String: AnyObject]` representation of the `Post` object.
     * note: Remember to use the correct keys. This will be the same Dictionary that you use in the failable initializer.
-3. Add a `jsonData` computed property as a convenient accessor that uses NSJSONSerialization to get an `NSData?` representation of the `jsonValue` dictionary.
-    * note: This will be used when you set the HTTP Body on the `NSMutableURLRequest`, which requires NSData?, not a [String: AnyObject]
+3. Add a `jsonData` computed property as a convenient accessor that uses JSONSerialization to get an `Data?` representation of the `jsonValue` dictionary.
+    * note: This will be used when you set the HTTP Body on the `URLRequest`, which requires Data?, not a [String: AnyObject]
 
 ### Add Posting Functionality to the PostController
 
@@ -208,7 +206,7 @@ Update your `PostController` to initialize a new `Post` and use the `NetworkCont
     * Capture the request URL from the `Post`'s `.endpoint` property.
     * Call the `NetworkController` `performRequestforURL` function. Passing the request URL, .PUT HTTP method, and the `post.jsonData` for the body.
     * Check for errors. Check the included API documentation for details on catching errors from the Post API.
-        * note: You can use `NSString(data: data!, encoding: NSUTF8StringEncoding)` to capture and print a readable representation of the returned data. Because of the quirks of this specific API, you will want to check this string to see if the returned data indicates an error.
+        * note: You can use `String(data: data!, encoding: .utf8)` to capture and print a readable representation of the returned data. Because of the quirks of this specific API, you will want to check this string to see if the returned data indicates an error.
     * If there are no errors, log the success and the response to the console.
     * After posting to the API, call `fetchPosts` to load the new `Post` and any other new `Post` objects from the server.
 
@@ -257,7 +255,7 @@ So you must update the `fetchPosts` function to support both of these use cases.
 5. Determine the necessary `timestamp` for your query based on whether you are resetting the list (where you would want to use the current time), or appending to the list (where you would want to use the time of the earlier fetched `Post`).
 
 ```swift
-    let queryEndInterval = reset ? NSDate().timeIntervalSince1970 : posts.last?.timestamp ?? NSDate().timeIntervalSince1970
+    let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.timestamp ?? Date().timeIntervalSince1970
 ```
 
 6. Build a `[String: String]` Dictionary literal of the URL Parameters you want to use.
@@ -293,7 +291,7 @@ You will notice that there is a repeated post where every new fetch occurred. If
 
 We can fix this bug by adjusting the `timestamp` we use for the query by a single digit. 
 
-1. Add a computed property `queryTimestamp` to the `Post` type that returns an `NSTimeInterval` adjusted by 0.000001 from the `self.timestamp`
+1. Add a computed property `queryTimestamp` to the `Post` type that returns an `TimeInterval` adjusted by 0.000001 from the `self.timestamp`
 2. Update the `queryEndInterval` variable in the `fetchPosts` function to use the `posts.last?.queryTimestamp` instead of the regular `timestamp`
 
 ### Black Diamonds
