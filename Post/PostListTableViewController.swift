@@ -22,6 +22,8 @@ class PostListTableViewController: UITableViewController {
 
         postController.delegate = self
     }
+	
+	// MARK: Actions
     
     @IBAction func addPostTapped(sender: AnyObject) {
         
@@ -40,7 +42,7 @@ class PostListTableViewController: UITableViewController {
     }
 
     
-    // MARK: - Table view data source
+    // MARK: UITableViewDataSource/Delegate
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
@@ -57,10 +59,7 @@ class PostListTableViewController: UITableViewController {
 
         return cell
     }
-    
-    
-    // MARK: - Table view delegate
-    
+	
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.row+1 == postController.posts.count {
             
@@ -75,7 +74,7 @@ class PostListTableViewController: UITableViewController {
     }
     
     
-    // MARK: - Alert Controllers
+    // MARK: Alerts
     
     func presentNewPostAlert() {
         let alertController = UIAlertController(title: "New Post", message: nil, preferredStyle: .Alert)
@@ -124,6 +123,8 @@ class PostListTableViewController: UITableViewController {
         presentViewController(alertController, animated: true, completion: nil)
     }
 }
+
+// MARK: - PostControllerDelegate
 
 extension PostListTableViewController: PostControllerDelegate {
     

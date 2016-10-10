@@ -12,20 +12,12 @@ class PostController {
     
     static let baseURL = NSURL(string: "https://devmtn-post.firebaseio.com/posts/")
     static let endpoint = baseURL?.URLByAppendingPathExtension("json")
-    
-    weak var delegate: PostControllerDelegate?
-    
-    var posts: [Post] = [] {
-        didSet {
-            delegate?.postsUpdated(posts)
-        }
-    }
-    
+	
     init() {
         fetchPosts()
     }
     
-    // MARK: - Save Post
+    // MARK: Save Post
     
     func addPost(username: String, text: String) {
         
@@ -49,7 +41,7 @@ class PostController {
         }
     }
     
-    // MARK: - Request
+    // MARK: Request
     
     func fetchPosts(reset reset: Bool = true, completion: ((newPosts: [Post]) -> Void)? = nil) {
     
@@ -98,6 +90,16 @@ class PostController {
             })
         }
     }
+	
+	// MARK: Properties
+	
+	weak var delegate: PostControllerDelegate?
+	
+	var posts: [Post] = [] {
+		didSet {
+			delegate?.postsUpdated(posts)
+		}
+	}
 }
 
 protocol PostControllerDelegate: class {
