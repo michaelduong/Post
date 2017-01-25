@@ -10,34 +10,34 @@ import Foundation
 
 class PostController {
 	
-	static let baseURL = URL(string: "https://devmtn-post.firebaseio.com/posts/")
-	static let endpoint = baseURL?.appendingPathExtension("json")
+	static let baseURL = URL(string: "https://devmtn-post.firebaseio.com/posts/")  
+	static let getterEndpoint = baseURL?.appendingPathExtension("json")  
 	
-	init() {
-		fetchPosts()
+	init() {  
+		fetchPosts()  
 	}
-	
+	 
 	// MARK: Save Post
 	
-	func addNewPostWith(username: String, text: String) {
+	func addNewPostWith(username: String, text: String) {  
 		
-		let post = Post(username: username, text: text)
+		let post = Post(username: username, text: text)  
 		
-		guard let requestURL = post.endpoint else { fatalError("URL optional is nil") }
+        guard let putEndpoint = PostController.baseURL?.appendingPathComponent(post.identifier.uuidString).appendingPathExtension("json") else { fatalError("URL optional is nil") }  
 		
-		NetworkController.performRequest(for: requestURL, httpMethod: .Put, body: post.jsonData)  { (data, error) in
+		NetworkController.performRequest(for: putEndpoint, httpMethod: .put, body: post.jsonData)  { (data, error) in  
 			
-			let responseDataString = String(data: data!, encoding: .utf8) ?? ""
+			let responseDataString = String(data: data!, encoding: .utf8) ?? ""  
 			
-			if error != nil {
-				print("Error: \(error)")
-			} else if responseDataString.contains("error") {
-				print("Error: \(responseDataString)")
-			} else {
-				print("Successfully saved data to endpoint. \nResponse: \(responseDataString)")
+			if error != nil {  
+				print("Error: \(error)")  
+			} else if responseDataString.contains("error") {  
+				print("Error: \(responseDataString)")  
+			} else {  
+				print("Successfully saved data to endpoint. \nResponse: \(responseDataString)")  
 			}
 			
-			self.fetchPosts()
+			self.fetchPosts()  
 		}
 	}
 	
@@ -45,42 +45,40 @@ class PostController {
 	
 	func fetchPosts(reset: Bool = true, completion: (([Post]) -> Void)? = nil) {
 		
-		guard let requestURL = PostController.endpoint else { fatalError("Post Endpoint url failed") }
+		guard let requestURL = PostController.getterEndpoint else { fatalError("Post Endpoint url failed") }  
 		
-		let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970
-		
-		//TODO update to query timestamp
+		let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970  
 		
 		let urlParameters = [
 			"orderBy": "\"timestamp\"",
 			"endAt": "\(queryEndInterval)",
 			"limitToLast": "15",
-			]
+			]  
 		
-		NetworkController.performRequest(for: requestURL, httpMethod: .Get, urlParameters: urlParameters) { (data, error) in
+		NetworkController.performRequest(for: requestURL, httpMethod: .get, urlParameters: urlParameters) { (data, error) in
 			
-			let responseDataString = String(data: data!, encoding: .utf8)
+			let responseDataString = String(data: data!, encoding: .utf8)  
 			
-			guard let data = data,
-				let postDictionaries = (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)) as? [String: [String: AnyObject]] else {
+			guard let data = data,  
+				let postDictionaries = (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)) as? [String: [String: Any]] else {
 					
 					NSLog("Unable to deserialize JSON. \nResponse: \(responseDataString)")
 					completion?([])
 					return
 			}
 			
-			let posts = postDictionaries.flatMap { Post(json: $0.1, identifier: $0.0) }
-			let sortedPosts = posts.sorted(by: { $0.0.timestamp > $0.1.timestamp })
+			let posts = postDictionaries.flatMap { Post(json: $0.1, identifier: $0.0) }  
+			let sortedPosts = posts.sorted(by: { $0.0.timestamp > $0.1.timestamp })  
 			
-			DispatchQueue.main.async {
+			DispatchQueue.main.async {  
 				
 				if reset {
-					self.posts = sortedPosts
+					self.posts = sortedPosts  
 				} else {
 					self.posts.append(contentsOf: sortedPosts)
 				}
 				
-				completion?(sortedPosts)
+				completion?(sortedPosts)  
 			}
 		}
 	}
@@ -89,14 +87,14 @@ class PostController {
 	
 	weak var delegate: PostControllerDelegate?
 	
-	var posts: [Post] = [] {
-		didSet {
-			delegate?.postsWereUpdatedTo(posts: posts, on: self)
+	var posts: [Post] = [] {  
+		didSet {  
+			delegate?.postsWereUpdatedTo(posts: posts, on: self)  
 		}
 	}
 }
 
-protocol PostControllerDelegate: class {
+protocol PostControllerDelegate: class {  
 	
-	func postsWereUpdatedTo(posts: [Post], on postController: PostController)
+	func postsWereUpdatedTo(posts: [Post], on postController: PostController)  
 }
