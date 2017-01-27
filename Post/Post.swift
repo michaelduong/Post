@@ -10,33 +10,27 @@ import Foundation
 
 struct Post {
     
-    fileprivate let UsernameKey = "username"
-    fileprivate let TextKey = "text"
-    fileprivate let TimestampKey = "timestamp"
-    fileprivate let UUIDKey = "uuid"
-
-	/* FIXME: This makes me cringe a little. We should do better. -Andrew */
-    var endpoint: URL? {
-        return PostController.baseURL?.appendingPathComponent(self.identifier.uuidString).appendingPathExtension("json")
-    }
+    fileprivate let UsernameKey = "username"  
+    fileprivate let TextKey = "text"  
+    fileprivate let TimestampKey = "timestamp"  
 	
-    init(username: String, text: String, identifier: UUID = UUID()) {
+    init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970, identifier: UUID = UUID()) {  
         
         self.username = username
         self.text = text
-        self.timestamp = Date().timeIntervalSince1970
+        self.timestamp = timestamp
         self.identifier = identifier
     }
 	
 	// MARK: Properties
 	
-	let username: String
+	let username: String  
 	let text: String
 	let timestamp: TimeInterval
 	let identifier: UUID
 	
 	var queryTimestamp: TimeInterval {
-		return timestamp - 0.000001
+		return timestamp - 0.000001  
 	}
 }
 
@@ -44,7 +38,7 @@ struct Post {
 
 extension Post {
 	
-	init?(json: [String: AnyObject], identifier: String) {
+	init?(json: [String: Any], identifier: String) {  
 		
 		guard let username = json[UsernameKey] as? String,
 			let text = json[TextKey] as? String,
@@ -57,7 +51,7 @@ extension Post {
 		self.identifier = identifier
 	}
 	
-	var jsonRepresentation: [String: Any] {
+	var jsonRepresentation: [String: Any] {  
 		
 		let json: [String: Any] = [
 			UsernameKey: username,
@@ -68,7 +62,7 @@ extension Post {
 		return json
 	}
 	
-	var jsonData: Data? {
+	var jsonData: Data? {  
 		
 		return try? JSONSerialization.data(withJSONObject: jsonRepresentation, options: [.prettyPrinted])
 	}
