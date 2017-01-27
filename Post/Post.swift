@@ -50,20 +50,4 @@ extension Post {
 		self.timestamp = TimeInterval(floatLiteral: timestamp)
 		self.identifier = identifier
 	}
-	
-	var jsonRepresentation: [String: Any] {  
-		
-		let json: [String: Any] = [
-			UsernameKey: username,
-			TextKey: text,
-			TimestampKey: timestamp,
-			]
-		
-		return json
-	}
-	
-	var jsonData: Data? {  
-		
-		return try? JSONSerialization.data(withJSONObject: jsonRepresentation, options: [.prettyPrinted])
-	}
 }
