@@ -10,9 +10,9 @@ import Foundation
 
 struct Post {
     
-    fileprivate let UsernameKey = "username"  
-    fileprivate let TextKey = "text"  
-    fileprivate let TimestampKey = "timestamp"  
+    fileprivate let usernameKey = "username"
+    fileprivate let textKey = "text"
+    fileprivate let timestampKey = "timestamp"
 	
     init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970, identifier: UUID = UUID()) {  
         
@@ -40,9 +40,9 @@ extension Post {
 	
 	init?(json: [String: Any], identifier: String) {  
 		
-		guard let username = json[UsernameKey] as? String,
-			let text = json[TextKey] as? String,
-			let timestamp = json[TimestampKey] as? Double,
+		guard let username = json[usernameKey] as? String,
+			let text = json[textKey] as? String,
+			let timestamp = json[timestampKey] as? Double,
 			let identifier = UUID(uuidString: identifier) else { return nil }
 		
 		self.username = username
@@ -50,4 +50,14 @@ extension Post {
 		self.timestamp = TimeInterval(floatLiteral: timestamp)
 		self.identifier = identifier
 	}
+    
+    var dictionaryRepresentation: [String: Any] {
+        
+        return [usernameKey: username, textKey: text, timestampKey: timestamp]
+    }
+    
+    var jsonData: Data? {
+        return (try? JSONSerialization.data(withJSONObject: dictionaryRepresentation, options: .prettyPrinted))
+    }
+    
 }
