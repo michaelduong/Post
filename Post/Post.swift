@@ -29,9 +29,6 @@ struct Post {
 	let timestamp: TimeInterval
 	let identifier: UUID
 	
-	var queryTimestamp: TimeInterval {
-		return timestamp - 0.000001  
-	}
 }
 
 // MARK: JSON Conversion
