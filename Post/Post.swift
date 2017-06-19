@@ -47,7 +47,7 @@ extension Post {
 		
 		self.username = username
 		self.text = text
-		self.timestamp = TimeInterval(floatLiteral: timestamp)
+		self.timestamp = timestamp
 		self.identifier = identifier
 	}
     
