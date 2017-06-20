@@ -22,48 +22,6 @@ Students who complete this project independently are able to:
 * Build custom table views that support paging through network requests
 ---
 
-### Network Controller
-
-Create a `NetworkController` class. This will have methods needed to build the different URLs you might want to use and it will also have a method to return `Data` from a URL. 
-
-The `NetworkController` will be responsible for building URLs and executing HTTP requests. Build the `NetworkController` to support different HTTP methods (GET, PUT, POST, PATCH, DELETE), and keep things generic such that you could use the same `NetworkController` in future projects if desired.
-
-It is good practice to write reusable code. Even when you do not plan to reuse the class in future projects, it will help you keep the roles of your types properly separated. In this specific case, it is good practice for the `NetworkController` to not know anything about the project's model or controller types.
-
-1. Write a `String` typed `enum` called `HTTPMethod`. You will use this enum to classify our HTTP requests as GET, PUT, POST, PATCH, or DELETE requests. Add cases for each.
-    * example: `case get = "GET"`
-2. Write a static function signature `performRequest(for url: ...)` that will take a `URL`, an `HTTPMethod`, an optional `[String: String]` dictionary of URL parameters, an optional `Data` request body, and an optional completion closure. The completion closure should include a `Data?` data parameter, an `Error?` error parameter, and should return `Void`. 
-    * note: At this point, it is OK if you do not understand why you are including each parameter. Spend some time contemplating each parameter and why you would include it in this function. For example: An HTTP request is made up of a URL and an HTTP Method. Certain requests need URL parameters. Certain POST or PUT requests can carry a body. The completion closure is included so you know when the request is complete.
-3. Add the following `url(byAdding parameters: ...)` static function to your `NetworkController` class. This function takes URL parameters, a base URL, and returns a completed URL with the parameters in place.
-    * example: To perform a Google Search, you use the URL `https://google.com/search?q=test`. 'q' and 'test' are URL parameters, with 'q' being the name, and 'test' beging the value. This function will take the base URL `https://google.com/search` and a `[String: String]` dictionary `["q":"test"]`, and return the URL `https://google.com/search?q=test`
-
-```
-static func url(byAdding parameters: [String : String]?, to url: URL) -> URL {
-    var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-    components?.queryItems = parameters?.flatMap({URLQueryItem(name: $0.0, value: $0.1)})
-
-    guard let url = components?.url else {
-        fatalError("URL optional is nil")
-    }
-    return url
-}
-```
-
-4. Implement the `performRequest(for url: ...)` function.
-    * Use the `url(byAdding parameters: ...)` to create a request URL.
-    * Create a `URLRequest` using your request URL, set the HTTP method, set the body.
-    * Generate and start the data task.
-    * Call the completion when the data task completes.
-
-This method will make the network call and call the completion closer with the `Data?` result. If successful, `Data?` will contain the response, if unsuccessful, `Data?` will be nil. The class or function that calls this function will need to handle nil data.
-
-5. Use a Playground to test your network controller method with a sample endpoint from the [Post API](https://devmtn-post.firebaseio.com/posts.json) to see if you are getting data returned.
-
-As of iOS 9, Apple is boosting security and requiring developers to use the secure HTTPS protocol and require the server to use the proper TLS Certificate version. The Post API does support HTTPS but does not use the correct TLS Certificate version. So for this app, you will need to turn off the App Transport Security feature.
-
-6. Open your `Info.plist` file and add a key-value pair to your Info.plist. This key-value pair should be: 
-`App Transport Security Settings : [Allow Arbitrary Loads : YES].`
-
 ### Implement Model
 
 Create a `Post` model type that will hold the information of a post to display to the user.
@@ -106,11 +64,17 @@ Because you will only use one View Controller in this project, there is no reaso
         * note: Because Dictionaries are unsorted, the `[Post]` you generated in this step will not be in any logical order.
     * Use the `sorted(by:)` function to sort the posts by the `timestamp` property in reverse chronological order.
     * Set `self.posts` to the sorted posts.
+    
+    As of iOS 9, Apple is boosting security and requiring developers to use the secure HTTPS protocol and require the server to use the proper TLS Certificate version. The Post API does support HTTPS but does not use the correct TLS Certificate version. So for this app, you will need to turn off the App Transport Security feature.
+
+5. Open your `Info.plist` file and add a key-value pair to your Info.plist. This key-value pair should be: 
+`App Transport Security Settings : [Allow Arbitrary Loads : YES].`
+
 
 At this point you should be able to pull the `Post` data from the API and serialize a list of `Post` objects. Test this functionality with a Playground or in your App Delegate by trying to print the results from the API to the console.
 
-5. Because you will always want to fetch posts whenever you initialize the `PostController`, add an `init()` function and call `fetchPosts()`. This will start the call to fetch posts and assign them to the `posts` property.
-6. Other classes that use the `PostController` will be interested to know whenever the `posts` property is updated. Implement the delegate pattern to allow the `PostController` to notify an observer of updates to the `posts` property.
+6. Because you will always want to fetch posts whenever you initialize the `PostController`, add an `init()` function and call `fetchPosts()`. This will start the call to fetch posts and assign them to the `posts` property.
+7. Other classes that use the `PostController` will be interested to know whenever the `posts` property is updated. Implement the delegate pattern to allow the `PostController` to notify an observer of updates to the `posts` property.
     * Create a `PostControllerDelegate` protocol with a `postsWereUpdated()` function with a parameter that will be used to pass an array of the posts.
     * Add an optional, weak variable called `delegate` of type `PostControllerDelegate`.
     * Use the `didSet` property observer on the `posts` variable to call the `postsWereUpdated()` function on the delegate.
