@@ -10,10 +10,10 @@ Students who complete this project independently are able to:
 
 #### Part One - Model Objects, Model Controller, URLSessionDataTask (HTTP GET method), Refresh Control
 
-* use URLSession to make asynchronous GET HTTP requests
-* parse JSON data and generate model objects from requests
-* use closures to execute code when an asynchronous task is complete
-* use UIRefreshControl to reload data for a table view
+* Use URLSession to make asynchronous GET HTTP requests
+* Parse JSON data and generate model objects from requests
+* Use closures to execute code when an asynchronous task is complete
+* Use UIRefreshControl to reload data for a table view
 
 #### Part Two - Alert Controllers, URLSessionDataTask (HTTP POST method), Paging Requests
 
@@ -36,13 +36,13 @@ Create a `Post` model type that will hold the information of a post to display t
 Create a model object that will represent the `Post` objects that are listed in the feed. This model object will be generated locally, but must also be able to be generated from JSON dictionaries.
 
 1. Create a `Post.swift` file and define a new `Post` struct.
-2. Go to a sample endpoint of the [Post API](https://devmtn-post.firebaseio.com/posts.json) and see what JSON (information) you will get back for each post.
-3. Using this information, add the properties on `Post`.
-* `let username: String`
-* `let text: String`
-* `let timestamp: TimeInterval`
-* `let identifier: UUID`
-* note: UUID stands for Universal Unique Identifier. The `Foundation` framework comes with a `UUID` class that helps generate and initialize `UUID`s from strings. Review the [Class Reference](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSUUID_Class/) to review how to create a new UUID, extract the string value, and initalize an `UUID` from a `String`.
+2. Go to a sample endpoint of the [Post API](https://devmtn-post.firebaseio.com/posts.json) API and see what JSON (information) you will get back for each post.
+3. Using this information, add the following properties on `Post`:
+    * `let username: String`
+    * `let text: String`
+    * `let timestamp: TimeInterval`
+    * `let identifier: UUID`
+      * note: UUID stands for Universal Unique Identifier. The `Foundation` framework comes with a `UUID` class that helps generate and initialize `UUID`s from strings. Review the [Class Reference](https://developer.apple.com/documentation/foundation/uuid) to review how to create a new UUID, extract the string value, and initalize an `UUID` from a `String`. 
 4. Create a memberwise initializer that takes parameters for the `username` and `text`. Optionally, add parameters for the `identifier` and `timestamp`, but set default values for them.
 * note: This memberwise initializer will only be used locally to generate new model objects. You can safely assume that initializing a new `Post` model object will require a new UUID for the `identifier`, and will use the `.timeIntervalSince1970` from the current date for the `timestamp`.
 5. Create a failable initializer function with a parameter of a JSON dictionary (`[String: Any]`) and an identifier (`String`). This is the method you will use to initialize your `Post` object from a JSON dictionary. Remember to use a sample endpoint to inspect the JSON you will get back and the keys you will use to get each piece of data. You will also need to create a `UUID` from the identifier you pass into the initializer. Guard against required values, and return `nil` if all required information for a post is not available.
@@ -61,21 +61,21 @@ Because you will only use one View Controller in this project, there is no reaso
 2. Add a static constant `getterEndpoint` to the `PostController` to know where to fetch `Post` objects from. Use the `baseURL` and `appendingPathExtension(_:)` function to build the correct endpoint for the API to fetch posts. (This URL will be passed to the `URLRequest`initializer that you will pass to create your `dataTask` in order to fetch posts.)
 3. Add a `posts` property that will hold the `Post` objects that you pull and serialize from the API.
 4. Add a method `fetchPosts` that provides an array of `Post` objects through an optional completion closure.
-* In the next steps you will create an instance of `URLSessionDataTask` that will get the data at the endpoint URL.
-* Create an instance of `URLRequest` and give it the getterEndpoint. (It's very important that you _not_ forget to set the request's httpMethod and httpBody.)
-* Create an instance of `URLSessionDataTask`(Don't forget to call `resume()` after creating this instance.) This method will make the network call and call the completion closer with the `Data?` result. If successful, `Data?` will contain the response, if unsuccessful, `Data?` will be nil. The class or function that calls this function needs to be able handle nil data.
-* In the closure of the `dataTask(with: URLRequest, completionHandler: ...)`, you will need to handle the results it comes back with:
-* Check for an error. If there is an error, print that error, call completion, and return.
-* Next, guard for data and create a constant called `postDictionaries` by serializing the JSON using `JSONSerialization`. You will need to use the `try` keyword to use `JSONSerialization` to serialize the `Data`. Note that the API returns a Dictionary with UUID Strings as the keys, and the [String: Any] representation as the value for each key. If the guard fails, print an error message, run the optional completion, and return from the function.
-* note: The syntax for this function can be very difficult. Do your best to complete this without looking at the solution code.
-* note: You _must_ run your completion closure even if the data is unavailable, otherwise the object that calls this function will be waiting for a response forever.
-* note: You can use `String(data: data, encoding: .utf8)` to capture and print a readable representation of the returned data.
-* If the Data can be serialized, initialize the `Post` objects and call the completion closure with the populated array. (Hint: Use a for loop or `.flatMap()` to iterate through the dictionaries and initialize a new array of `Post` objects.)
-* note: Because Dictionaries are unsorted, the `[Post]` you generated in this step will not be in any logical order.
-* Use the `sorted(by:)` function to sort the posts by the `timestamp` property in reverse chronological order.
-* Set `self.posts` to the sorted posts.
-* Unwrap the completion and run the closure with the sorted posts as the parameter.
-* Because a primary use case for `fetchPosts()` will be to reload the user interface when the request is finished, use Grand Central Dispatch to force the completion closure to run on the main thread. (Hint: `DispatchQueue.main.async`)
+    * In the next steps you will create an instance of `URLSessionDataTask` that will get the data at the endpoint URL.
+    * Create an instance of `URLRequest` and give it the getterEndpoint. (It's very important that you _not_ forget to set the request's httpMethod and httpBody.)
+    * Create an instance of `URLSessionDataTask`(Don't forget to call `resume()` after creating this instance.) This method will make the network call and call the completion closer with the `Data?` result. If successful, `Data?` will contain the response, if unsuccessful, `Data?` will be nil. The class or function that calls this function needs to be able handle nil data.
+    * In the closure of the `dataTask(with: URLRequest, completionHandler: ...)`, you will need to handle the results it comes back with:
+    * Check for an error. If there is an error, print that error, call completion, and return.
+    * Next, guard for data and create a constant called `postDictionaries` by serializing the JSON using `JSONSerialization`. You will need to use the `try` keyword to use `JSONSerialization` to serialize the `Data`. Note that the API returns a Dictionary with UUID Strings as the keys, and the [String: Any] representation as the value for each key. If the guard fails, print an error message, run the optional completion, and return from the function.
+      * note: The syntax for this function can be very difficult. Do your best to complete this without looking at the solution code.
+      * note: You _must_ run your completion closure even if the data is unavailable, otherwise the object that calls this function will be waiting for a response forever.
+      * note: You can use `String(data: data, encoding: .utf8)` to capture and print a readable representation of the returned data.
+    * If the Data can be serialized, initialize the `Post` objects and call the completion closure with the populated array. (Hint: Use a for loop or `.flatMap()` to iterate through the dictionaries and initialize a new array of `Post` objects.)
+      * note: Because Dictionaries are unsorted, the `[Post]` you generated in this step will not be in any logical order.
+    * Use the `sorted(by:)` function to sort the posts by the `timestamp` property in reverse chronological order.
+    * Set `self.posts` to the sorted posts.
+    * Unwrap the completion and run the closure with the sorted posts as the parameter.
+    * Because a primary use case for `fetchPosts()` will be to reload the user interface when the request is finished, use Grand Central Dispatch to force the completion closure to run on the main thread. (Hint: `DispatchQueue.main.async`)
 
 There are many different patterns and techniques to serialize JSON data into Model objects. Feel free to experiment with different techniques to get at the `[String: Any]` dictionaries within the Data returned from the `URLSessionDataTask`.
 
@@ -88,36 +88,34 @@ At this point you should be able to pull the `Post` data from the API and serial
 
 5. Because you will always want to fetch posts whenever you initialize the `PostController`, add an `init()` function and call `fetchPosts()`. This will start the call to fetch posts and assign them to the `posts` property.
 6. Other classes that use the `PostController` will be interested to know whenever the `posts` property is updated. Implement the delegate pattern to allow the `PostController` to notify an observer of updates to the `posts` property.
-* Add a `PostControllerDelegate` protocol with a `postsWereUpdatedTo(posts:, on postController:)` function with a parameter that will be used to pass an array of the posts.
-* Add an optional, weak `delegate` variable of type `PostControllerDelegate`.
-* Use the `didSet` property observer on the `posts` variable to call the `postsWereUpdatedTo(posts:, on:)` function on the delegate.
+    * Add a `PostControllerDelegate` protocol with a `postsWereUpdatedTo(posts:, on postController:)` function with a parameter that will be used to pass an array of the posts.
+    * Add an optional, weak `delegate` variable of type `PostControllerDelegate`.
+    * Use the `didSet` property observer on the `posts` variable to call the `postsWereUpdatedTo(posts:, on:)` function on the delegate.
 
 ### Post List Table View Controller
-
-Build a view that lists all posts. Implement dynamic height for the cells so that messages are not truncated. Include a Refresh Control that allows the user to 'pull to refresh' to load new, recent posts. Conform to the `PostControllerDelegate` protocol to reload the tableview when the `PostController` serializes new posts from the API.
 
 #### Table View Setup
 
 1. Add a `UITableViewController` as your root view controller in Main.storyboard and embed it in a `UINavigationController`
 2. Create an `PostListTableViewController` file as a subclass of `UITableViewController` and set the class of your root view controller scene
 3. Add a `postController` property to `PostListTableViewController` and set it to an instance of `PostController`
-4. Implement the UITableViewDataSource functions using the included `postController.posts` array
+4. Implement the `UITableViewDataSource` functions using the included `postController.posts` array
 5. Set the `cell.textLabel` to the message, and the `cell.detailTextLabel` to the author and post date.
-* note: It may also help to temporarily add the `indexPath.row` to the `cell.detailTextLabel` to quickly determine if the posts are showing up where you expect them to be.
+  * note: It may also help to temporarily add the `indexPath.row` to the `cell.detailTextLabel` to quickly determine if the posts are showing up where you expect them to be.
 
 #### Reload with Posts
 
-Adopt the `PostControllerDelegate` protocol to observe the `posts` property on the `PostController` to reload the tableview when there are new results.
+Adopt the `PostControllerDelegate` protocol so the `PostController` can notify the tableViewController when posts have been updated, and in turn it can reload the tableView
 
 1. Adopt the `PostControllerDelegate` protocol in the `PostListTableViewController`.
-2. Implement the required `postsWereUpdatedTo(posts:on:)` function by reloading the table view
-3. Set the delegate in the `viewDidLoad()`
+2. Implement the required `postsWereUpdated()` function by reloading the table view
+3. Set your tableViewController to be the delegate in the `viewDidLoad()`
 
 #### Dynamic Cell Height
 
 The length of the text on each `Post` is variable. Add support for dynamic resizing cells to your table view so messages are not truncated.
 
-1. Set the `tableView.estimatedRowHeight` in the `viewDidLoad()` function
+1. Set the `tableView.estimatedRowHeight` in the `viewDidLoad()` function. Look in the documentation [here](https://developer.apple.com/documentation/uikit/uitableview/1614925-estimatedrowheight) for more information on the `estimatedRowHeight` property on `UITableView`.
 2. Set the `tableView.rowHeight` to `UITableViewAutomaticDimension`
 3. Update the `textLabel` and `detailTextLabel` on the Post List storyboard scene to support multiple lines by setting the number of lines to 0 in the attributes inspector.
 
@@ -125,10 +123,10 @@ The length of the text on each `Post` is variable. Add support for dynamic resiz
 
 Add a `UIRefreshControl` to the table view to support the 'pull to refresh' gesture.
 
-1. Add a `UIRefreshControl` object to the table view on the storyboard scene
-2. Add an IBAction from the `UIRefreshControl` to your `PostListTableViewController` class file
-3. Implement the IBaction by telling the `postController` to fetch new posts
-4. Tell the `UIRefreshControl` to end refreshing when the `fetchPosts` is complete.
+1. Add a `UIRefreshControl` object to the table view on the storyboard scene. To do this, you must select the   TableViewController, then in the attributes inspector, There is a drop-down menu called "Refreshing". Select "Enabled".
+2. Add an IBAction from the `UIRefreshControl` to your `PostListTableViewController` class file. (The refresh control can be found in the view heirarchy on the left of the storyboard.)
+3. In the IBaction, callthe `fetchPosts` function on the PostController
+4. Tell the `UIRefreshControl` to end refreshing when the `fetchPosts`  is complete.
 
 #### Network Activity Indicator
 
