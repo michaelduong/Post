@@ -8,68 +8,19 @@ Post is a single view application, with the main view being a list of all posts 
 
 Students who complete this project independently are able to:
 
-#### Part One - Model Objects, Model Controller, Network Controller (HTTP GET), Refresh Control
+#### Part One - Model Object, Model Controller, Refresh Control
 
-* use URLSession to make asynchronous GET HTTP requests
-* parse JSON data and generate model objects from requests
-* use closures to execute code when an asynchronous task is complete
-* use UIRefreshControl to reload data for a table view
+* Use URLSession to make asynchronous GET HTTP requests
+* Parse JSON data and generate model objects from requests
+* Use closures to execute code when an asynchronous task is complete
+* Use UIRefreshControl to reload data for a table view
+
 
 #### Part Two - Alert Controllers, Network Controller (HTTP POST), Paging Requests
 
-* use URLSession to make asynchronous POST HTTP requests
-* build custom table views that support paging through network requests
-
-## Part One - Model Objects, Model Controller, Network Controller (HTTP GET), Refresh Control
-
-* use URLSession to make asynchronous GET HTTP requests
-* parse JSON data and generate model objects from requests
-* use closures to execute code when an asynchronous task is complete
-* use UIRefreshControl to reload data for a table view
-
-Build the network controller, post model object, post controller, and post list view controller. Add some polish to the view controller to allow the user to reload posts and know when network requests are happening. Focus on the network requests and serializing the data to display posts in the post list view controller.
-
-### Network Controller
-
-Create a `NetworkController` class. This will have methods needed to build the different URLs you might want to use and it will also have a method to return `Data` from a URL. 
-
-The `NetworkController` will be responsible for building URLs and executing HTTP requests. Build the `NetworkController` to support different HTTP methods (GET, PUT, POST, PATCH, DELETE), and keep things generic such that you could use the same `NetworkController` in future projects if desired.
-
-It is good practice to write reusable code. Even when you do not plan to reuse the class in future projects, it will help you keep the roles of your types properly separated. In this specific case, it is good practice for the `NetworkController` to not know anything about the project's model or controller types.
-
-1. Write a `String` typed `enum` called `HTTPMethod`. You will use this enum to classify our HTTP requests as GET, PUT, POST, PATCH, or DELETE requests. Add cases for each.
-    * example: `case get = "GET"`
-2. Write a static function signature `performRequest(for url: ...)` that will take a `URL`, an `HTTPMethod`, an optional `[String: String]` dictionary of URL parameters, an optional `Data` request body, and an optional completion closure. The completion closure should include a `Data?` data parameter, an `Error?` error parameter, and should return `Void`. 
-    * note: At this point, it is OK if you do not understand why you are including each parameter. Spend some time contemplating each parameter and why you would include it in this function. For example: An HTTP request is made up of a URL and an HTTP Method. Certain requests need URL parameters. Certain POST or PUT requests can carry a body. The completion closure is included so you know when the request is complete.
-3. Add the following `url(byAdding parameters: ...)` static function to your `NetworkController` class. This function takes URL parameters, a base URL, and returns a completed URL with the parameters in place.
-    * example: To perform a Google Search, you use the URL `https://google.com/search?q=test`. 'q' and 'test' are URL parameters, with 'q' being the name, and 'test' beging the value. This function will take the base URL `https://google.com/search` and a `[String: String]` dictionary `["q":"test"]`, and return the URL `https://google.com/search?q=test`
-
-```
-static func url(byAdding parameters: [String : String]?, to url: URL) -> URL {
-    var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-    components?.queryItems = parameters?.flatMap({URLQueryItem(name: $0.0, value: $0.1)})
-
-    guard let url = components?.url else {
-        fatalError("URL optional is nil")
-    }
-    return url
-}
-```
-
-4. Implement the `performRequest(for url: ...)` function.
-    * Use the `url(byAdding parameters: ...)` to create a request URL.
-    * Create a `URLRequest` using your request URL, set the HTTP method, set the body.
-    * Generate and start the data task.
-    * Call the completion when the data task completes.
-
-This method will make the network call and call the completion closer with the `Data?` result. If successful, `Data?` will contain the response, if unsuccessful, `Data?` will be nil. The class or function that calls this function will need to handle nil data.
-
-5. Use a Playground to test your network controller method with a sample endpoint from the [Post API](https://devmtn-post.firebaseio.com/posts.json) to see if you are getting data returned.
-
-As of iOS 9, Apple is boosting security and requiring developers to use the secure HTTPS protocol and require the server to use the proper TLS Certificate version. The Post API does support HTTPS but does not use the correct TLS Certificate version. So for this app, you will need to turn off the App Transport Security feature.
-
-6. Open your `Info.plist` file and add a key-value pair to your Info.plist. This key-value pair should be: 
-`App Transport Security Settings : [Allow Arbitrary Loads : YES].`
+* Use URLSession to make asynchronous POST HTTP requests
+* Build custom table views that support paging through network requests
+---
 
 ### Implement Model
 
@@ -79,12 +30,12 @@ Create a model object that will represent the `Post` objects that are listed in 
 
 1. Create a `Post.swift` file and define a new `Post` struct.
 2. Go to a sample endpoint of the [Post API](https://devmtn-post.firebaseio.com/posts.json) API and see what JSON (information) you will get back for each post.
-3. Using this information, add the properties on `Post`.
+3. Using this information, add the following properties on `Post`:
     * `let username: String`
     * `let text: String`
     * `let timestamp: TimeInterval`
     * `let identifier: UUID`
-    * note: UUID stands for Universal Unique Identifier. The `Foundation` framework comes with a `UUID` class that helps generate and initialize `UUID`s from strings. Review the [Class Reference](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSUUID_Class/) to review how to create a new UUID, extract the string value, and initalize an `UUID` from a `String`. 
+      * note: UUID stands for Universal Unique Identifier. The `Foundation` framework comes with a `UUID` class that helps generate and initialize `UUID`s from strings. Review the [Class Reference](https://developer.apple.com/documentation/foundation/uuid) to review how to create a new UUID, extract the string value, and initalize an `UUID` from a `String`. 
 4. Create a memberwise initializer that takes parameters for the `username` and `text`. Optionally, add parameters for the `identifier` and `timestamp`, but set default values for them.
     * note: This memberwise initializer will only be used locally to generate new model objects. You can safely assume that initializing a new `Post` model object will require a new UUID for the `identifier`, and will use the `.timeIntervalSince1970` from the current date for the `timestamp`.
 5. Create a failable initializer function with a parameter of a JSON dictionary (`[String: Any]`) and an identifier (`String`). This is the method you will use to initialize your `Post` object from a JSON dictionary. Remember to use a sample endpoint to inspect the JSON you will get back and the keys you will use to get each piece of data. You will also need to create a `UUID` from the identifier you pass into the initializer. Guard against required values, and return `nil` if all required information for a post is not available.
@@ -100,57 +51,57 @@ Create a `PostController` class. This class will use the `NetworkController` to 
 Because you will only use one View Controller in this project, there is no reason to make this controller a singleton or shared controller. To learn more about when singletons may not be the best tool, review this article on [Singleton Abuse](https://www.objc.io/issues/13-architecture/singletons/#global-state). The key takeaway for now is that singletons aren't always the right tool for the job and you should carefully consider if it is the best pattern for accessing data in your project.
 
 1. Add a static constant `baseURL` for the `PostController` to know the base URL for the /posts/ subdirectory. This URL will be used to build other URLs throughout the app.
-2. Add a static constant `getterEndpoint` to the `PostController` to know where to fetch `Post` objects from. Use the `baseURL` and `appendingPathExtension(_:)` function to build the correct endpoint for the API to fetch posts. This URL will be passed to the `NetworkController` when you want to fetch posts.
+2. Add a singleton instance of the `PostController` called `shared`.
 3. Add a `posts` property that will hold the `Post` objects that you pull and serialize from the API.
-4. Add a method `fetchPosts` that provides an array of `Post` objects through an optional completion closure.
-* This method should call the `NetworkController` `performRequest(for:...)` method to get the Data at the endpoint URL.
-    * In the closure of the `performRequest(for:...)`, guard for data and `postDictionaries` by serializing the JSON using `JSONSerialization`. You will need to use the `try` keyword to use `JSONSerialization` to serialize the `Data`. Note that the API returns a Dictionary with UUID Strings as the keys, and the [String: Any] representation as the value for each key. If the guard fails, print an error message, run the optional completion, and return from the function.
-        * note: The syntax for this function can be very difficult. Do your best to complete this without looking at the solution code.
-        * note: You _must_ run your closure even if the data is unavailable, otherwise the object that calls this function will be waiting for a response forever.
-        * note: You can use `String(data: data!, encoding: .utf8)` to capture and print a readable representation of the returned data.
-    * If the Data can be serialized, initialize the `Post` objects and call the completion closure with the populated array. (Hint: Use a for loop or `.flatMap()` to iterate through the dictionaries and initialize a new array of `Post` objects.)
+4. Add a `fetchPosts` function.
+    * This method should use the `baseURL`, and fetch the JSON at that endpoint. Since we are using a Firebase URL as the baseURL, we must add a "json" extension to the end of the base URL. Create a new URL by calling `appendingPathExtension(...)` on your baseURL to accomplish this. **Note that not every API needs this step.**
+    * Using this URL, create a dataTask using `URLSession.shared.dataTask(with: URL...`. Since we have a simple URL that needs nothing like http headers, or httpBody to be able to fetch the data, we can simply use the `dataTask(with: URL` instead of `dataTask(with: URLRequest`. When using this dataTask initializer, it automatically has a "GET" httpMethod.
+    * In the completion closure of the dataTask, check for errors, make sure the data returned is nil. Then create a  `postDictionaries` property by serializing the JSON using `JSONSerialization`. You will need to use the `try?` keyword to use `JSONSerialization` to serialize the `Data`. 
+      * Note that the API returns a Dictionary with UUID Strings as the keys, and the [String: Any] representation as the value for each key. If the check fails, print an error message, return from the function.
+      * Note: The syntax for this function can be very difficult. Do your best to complete this without looking at the solution code.
+      * Note: You can use `String(data: data, encoding: .utf8)` to capture and print a readable representation of the returned data.
+    * If the Data can be serialized, initialize the `Post` objects and call the completion closure with the populated array. (Hint: Use a for-in loop or `.flatMap()` to iterate through the dictionaries and initialize a new array of `Post` objects.)
         * note: Because Dictionaries are unsorted, the `[Post]` you generated in this step will not be in any logical order.
     * Use the `sorted(by:)` function to sort the posts by the `timestamp` property in reverse chronological order.
     * Set `self.posts` to the sorted posts.
-    * Unwrap the completion and run the closure with the sorted posts as the parameter.
-    * Because a primary use case for `fetchPosts()` will be to reload the user interface when the request is finished, use Grand Central Dispatch to force the completion closure to run on the main thread. (Hint: `DispatchQueue.main.async`)
+    
+    As of iOS 9, Apple is boosting security and requiring developers to use the secure HTTPS protocol and require the server to use the proper TLS Certificate version. The Post API does support HTTPS but does not use the correct TLS Certificate version. So for this app, you will need to turn off the App Transport Security feature.
 
-There are many different patterns and techniques to serialize JSON data into Model objects. Feel free to experiment with different techniques to get at the `[String: Any]` dictionaries within the Data returned from the `URLSessionDataTask`. 
+5. Open your `Info.plist` file and add a key-value pair to your Info.plist. This key-value pair should be: 
+`App Transport Security Settings : [Allow Arbitrary Loads : YES].`
+
 
 At this point you should be able to pull the `Post` data from the API and serialize a list of `Post` objects. Test this functionality with a Playground or in your App Delegate by trying to print the results from the API to the console.
 
-5. Because you will always want to fetch posts whenever you initialize the `PostController`, add an `init()` function and call `fetchPosts()`. This will start the call to fetch posts and assign them to the `posts` property.
-6. Other classes that use the `PostController` will be interested to know whenever the `posts` property is updated. Implement the delegate pattern to allow the `PostController` to notify an observer of updates to the `posts` property.
-    * Add a `PostControllerDelegate` protocol with a `postsWereUpdatedTo(posts:, on postController:)` function with a parameter that will be used to pass an array of the posts.
-    * Add an optional, weak `delegate` variable of type `PostControllerDelegate`.
-    * Use the `didSet` property observer on the `posts` variable to call the `postsWereUpdatedTo(posts:, on:)` function on the delegate.
+6. Because you will always want to fetch posts whenever you initialize the `PostController`, add an `init()` function and call `fetchPosts()`. This will start the call to fetch posts and assign them to the `posts` property.
+7. Other classes that use the `PostController` will be interested to know whenever the `posts` property is updated. Implement the delegate pattern to allow the `PostController` to notify an observer of updates to the `posts` property.
+    * Create a `PostControllerDelegate` protocol with a `postsWereUpdated()` function with a parameter that will be used to pass an array of the posts.
+    * Add an optional, weak variable called `delegate` of type `PostControllerDelegate`.
+    * Use the `didSet` property observer on the `posts` variable to call the `postsWereUpdated()` function on the delegate.
 
 ### Post List Table View Controller
-
-Build a view that lists all posts. Implement dynamic height for the cells so that messages are not truncated. Include a Refresh Control that allows the user to 'pull to refresh' to load new, recent posts. Conform to the `PostControllerDelegate` protocol to reload the tableview when the `PostController` serializes new posts from the API.
 
 #### Table View Setup
 
 1. Add a `UITableViewController` as your root view controller in Main.storyboard and embed it in a `UINavigationController`
 2. Create an `PostListTableViewController` file as a subclass of `UITableViewController` and set the class of your root view controller scene
-3. Add a `postController` property to `PostListTableViewController` and set it to an instance of `PostController`
-4. Implement the UITableViewDataSource functions using the included `postController.posts` array
-5. Set the `cell.textLabel` to the message, and the `cell.detailTextLabel` to the author and post date.
+3. Implement the `UITableViewDataSource` functions using the array of Post objects from the PostController's singleton.
+4. Set the cell's text label to the message, and the detailTextLabel to the author **and** post date.
     * note: It may also help to temporarily add the `indexPath.row` to the `cell.detailTextLabel` to quickly determine if the posts are showing up where you expect them to be.
 
 #### Reload with Posts
 
-Adopt the `PostControllerDelegate` protocol to observe the `posts` property on the `PostController` to reload the tableview when there are new results.
+Adopt the `PostControllerDelegate` protocol so the `PostController` can notify the tableViewController when posts have been updated, and in turn it can reload the tableView
 
 1. Adopt the `PostControllerDelegate` protocol in the `PostListTableViewController`.
-2. Implement the required `postsWereUpdatedTo(posts:on:)` function by reloading the table view
-3. Set the delegate in the `viewDidLoad()`
+2. Implement the required `postsWereUpdated()` function by reloading the table view
+3. Set your tableViewController to be the delegate in the `viewDidLoad()`
 
 #### Dynamic Cell Height
 
 The length of the text on each `Post` is variable. Add support for dynamic resizing cells to your table view so messages are not truncated.
 
-1. Set the `tableView.estimatedRowHeight` in the `viewDidLoad()` function
+1. Set the `tableView.estimatedRowHeight` in the `viewDidLoad()` function. Look in the documentation [here](https://developer.apple.com/documentation/uikit/uitableview/1614925-estimatedrowheight) for more information on the `estimatedRowHeight` property on `UITableView`.
 2. Set the `tableView.rowHeight` to `UITableViewAutomaticDimension`
 3. Update the `textLabel` and `detailTextLabel` on the Post List storyboard scene to support multiple lines by setting the number of lines to 0 in the attributes inspector.
 
@@ -158,10 +109,10 @@ The length of the text on each `Post` is variable. Add support for dynamic resiz
 
 Add a `UIRefreshControl` to the table view to support the 'pull to refresh' gesture.
 
-1. Add a `UIRefreshControl` object to the table view on the storyboard scene
-2. Add an IBAction from the `UIRefreshControl` to your `PostListTableViewController` class file
-3. Implement the IBaction by telling the `postController` to fetch new posts
-4. Tell the `UIRefreshControl` to end refreshing when the `fetchPosts` is complete.
+1. Add a `UIRefreshControl` object to the table view on the storyboard scene. To do this, you must select the   TableViewController, then in the attributes inspector, There is a drop-down menu called "Refreshing". Select "Enabled".
+2. Add an IBAction from the `UIRefreshControl` to your `PostListTableViewController` class file. (The refresh control can be found in the view heirarchy on the left of the storyboard.)
+3. In the IBaction, callthe `fetchPosts` function on the PostController
+4. Tell the `UIRefreshControl` to end refreshing when the `fetchPosts`  is complete.
 
 #### Network Activity Indicator
 
