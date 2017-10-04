@@ -8,53 +8,53 @@
 
 import Foundation
 
-struct Post {
-    
-    fileprivate let usernameKey = "username"
-    fileprivate let textKey = "text"
-    fileprivate let timestampKey = "timestamp"
+struct PostList: Codable {
+	struct PostKey: CodingKey {
+		var stringValue: String
+		init?(stringValue: String) {
+			self.stringValue = stringValue
+		}
+		
+		var intValue: Int? { return nil }
+		init?(intValue: Int) { return nil }
+		
+		static let username = PostKey(stringValue: "username")!
+		static let text = PostKey(stringValue: "text")!
+		static let timestamp = PostKey(stringValue: "timestamp")!
+	}
 	
-    init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970, identifier: UUID = UUID()) {  
-        
-        self.username = username
-        self.text = text
-        self.timestamp = timestamp
-        self.identifier = identifier
-    }
+	init(from decoder: Decoder) throws {
+		let container = try decoder.container(keyedBy: PostKey.self)
+		var posts = [Post]()
+		for key in container.allKeys {
+			let nested = try container.nestedContainer(keyedBy: PostKey.self, forKey: key)
+			let username = try nested.decode(String.self, forKey: .username)
+			let text = try nested.decode(String.self, forKey: .text)
+			let timestamp = try nested.decode(TimeInterval.self, forKey: .timestamp)
+			guard let uuid = UUID(uuidString: key.stringValue) else {
+				throw DecodingError.dataCorruptedError(forKey: key, in: container, debugDescription: "Identifier \(key.stringValue) isn't a UUID")
+			}
+			let post = Post(username: username, text: text, timestamp: timestamp, identifier: uuid)
+			posts.append(post)
+		}
+		self.posts = posts
+	}
 	
-	// MARK: Properties
-	
-	let username: String  
-	let text: String
-	let timestamp: TimeInterval
-	let identifier: UUID
-	
+	let posts: [Post]
 }
 
-// MARK: JSON Conversion
-
-extension Post {
+struct Post: Codable {
 	
-	init?(json: [String: Any], identifier: String) {  
-		
-		guard let username = json[usernameKey] as? String,
-			let text = json[textKey] as? String,
-			let timestamp = json[timestampKey] as? Double,
-			let identifier = UUID(uuidString: identifier) else { return nil }
+	init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970, identifier: UUID = UUID()) {
 		
 		self.username = username
 		self.text = text
 		self.timestamp = timestamp
 		self.identifier = identifier
 	}
-    
-    var dictionaryRepresentation: [String: Any] {
-        
-        return [usernameKey: username, textKey: text, timestampKey: timestamp]
-    }
-    
-    var jsonData: Data? {
-        return (try? JSONSerialization.data(withJSONObject: dictionaryRepresentation, options: .prettyPrinted))
-    }
-    
+	
+	let username: String
+	let text: String
+	let timestamp: TimeInterval
+	let identifier: UUID
 }
