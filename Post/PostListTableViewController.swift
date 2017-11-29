@@ -23,6 +23,10 @@ class PostListTableViewController: UITableViewController {
     
     // MARK: Actions
     
+    @IBAction func addPostButtonTapped(_ sender: Any) {
+        presentNewPostAlert()
+    }
+    
     @IBAction func refreshControlPulled(_ sender: UIRefreshControl) {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true

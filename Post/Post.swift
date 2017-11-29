@@ -8,18 +8,13 @@
 
 import Foundation
 
-struct Post {
-    
-    fileprivate let usernameKey = "username"
-    fileprivate let textKey = "text"
-    fileprivate let timestampKey = "timestamp"
+struct Post: Codable {
 	
-    init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970, identifier: UUID = UUID()) {  
-        
+    init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970) {
+
         self.username = username
         self.text = text
         self.timestamp = timestamp
-        self.identifier = identifier
     }
 	
 	// MARK: Properties
@@ -27,34 +22,5 @@ struct Post {
 	let username: String  
 	let text: String
 	let timestamp: TimeInterval
-	let identifier: UUID
-	
 }
 
-// MARK: JSON Conversion
-
-extension Post {
-	
-	init?(json: [String: Any], identifier: String) {  
-		
-		guard let username = json[usernameKey] as? String,
-			let text = json[textKey] as? String,
-			let timestamp = json[timestampKey] as? Double,
-			let identifier = UUID(uuidString: identifier) else { return nil }
-		
-		self.username = username
-		self.text = text
-		self.timestamp = timestamp
-		self.identifier = identifier
-	}
-    
-    var dictionaryRepresentation: [String: Any] {
-        
-        return [usernameKey: username, textKey: text, timestampKey: timestamp]
-    }
-    
-    var jsonData: Data? {
-        return (try? JSONSerialization.data(withJSONObject: dictionaryRepresentation, options: .prettyPrinted))
-    }
-    
-}
