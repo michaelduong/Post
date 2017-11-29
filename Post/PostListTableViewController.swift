@@ -18,12 +18,15 @@ class PostListTableViewController: UITableViewController {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-        PostController.shared.delegate = self
+        PostController.shared.fetchPosts {
+            self.reloadTableView()
+        }
     }
     
     // MARK: Actions
     
     @IBAction func addPostButtonTapped(_ sender: Any) {
+        
         presentNewPostAlert()
     }
     
@@ -31,8 +34,20 @@ class PostListTableViewController: UITableViewController {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-        PostController.shared.fetchPosts()
+        PostController.shared.fetchPosts {
+            self.reloadTableView()
+        }
         
+    }
+    
+    func reloadTableView() {
+        
+        DispatchQueue.main.async {
+
+            self.tableView.reloadData()
+            
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        }
     }
     
     func presentNewPostAlert() {
@@ -61,7 +76,9 @@ class PostListTableViewController: UITableViewController {
                     return
             }
             
-            PostController.shared.addPost(username: username, text: text)
+            PostController.shared.addPost(username: username, text: text, completion: {
+                self.reloadTableView()
+            })
             
         }
         alertController.addAction(postAction)
@@ -99,19 +116,5 @@ class PostListTableViewController: UITableViewController {
         cell.detailTextLabel?.text = "\(indexPath.row) - \(post.username) - \(Date(timeIntervalSince1970: post.timestamp))"
         
         return cell
-    }
-}
-
-// MARK: - PostControllerDelegate
-
-extension PostListTableViewController: PostControllerDelegate {
-    
-    func postsWereUpdated() {
-        DispatchQueue.main.async {
-            
-            self.tableView.reloadData()
-            
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
-        }
     }
 }

@@ -14,13 +14,9 @@ class PostController {
     
     let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")
     
-    init() {
-        fetchPosts()
-    }
-    
     // MARK: Request
     
-    func fetchPosts() {
+    func fetchPosts(completion: @escaping() -> Void) {
         
         guard let baseURL = baseURL else { fatalError("Post endpoint url failed") }
         
@@ -30,10 +26,11 @@ class PostController {
             
             if let error = error {
                 NSLog("There was an error retrieving data in \(#function). Error: \(error)")
+                completion()
                 return
             }
             
-            guard let data = data else { NSLog("No data returned from data task."); return }
+            guard let data = data else { NSLog("No data returned from data task."); completion();  return }
             
             do {
                 let decoder = JSONDecoder()
@@ -41,21 +38,22 @@ class PostController {
                 let posts: [Post] = postsDictionary.flatMap( { $0.value })
                 let sortedPosts = posts.sorted(by: { $0.timestamp > $1.timestamp })
                 self.posts = sortedPosts
-                
+                completion()
             } catch let error {
                 NSLog("ERROR decoding: \(error.localizedDescription)")
+                completion()
             }
         })
         dataTask.resume()
     }
     
-    func addPost(username: String, text: String) {
+    func addPost(username: String, text: String, completion: @escaping() -> Void) {
         
         let post = Post(username: username, text: text)
         
-        guard let postData = try? JSONEncoder().encode(post) else { return }
+        guard let postData = try? JSONEncoder().encode(post) else { completion(); return }
         
-        guard let baseURL = self.baseURL else { return }
+        guard let baseURL = self.baseURL else { completion(); return }
         
         let requestURL = baseURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("json")
         
@@ -67,30 +65,22 @@ class PostController {
         
         let dataTask = URLSession.shared.dataTask(with: request) { (data, _, error) in
             
-            if let error = error { NSLog(error.localizedDescription) }
+            if let error = error { completion(); NSLog(error.localizedDescription) }
             
             guard let data = data,
-                let responseDataString = String(data: data, encoding: .utf8) else { NSLog("Data is nil. Unable to verify if data was able to be put to endpoint."); return }
+                let responseDataString = String(data: data, encoding: .utf8)
+                else { NSLog("Data is nil. Unable to verify if data was able to be put to endpoint.");
+                    completion()
+                    return }
             
-            print("Successfully saved data to endpoint. \nResponse: \(responseDataString)")
-            
-            self.fetchPosts()
+            self.fetchPosts {
+                completion()
+            }
         }
         dataTask.resume()
     }
     
     // MARK: Properties
     
-    weak var delegate: PostControllerDelegate?
-    
-    var posts: [Post] = [] {
-        didSet {
-            delegate?.postsWereUpdated()
-        }
-    }
-}
-
-protocol PostControllerDelegate: class {
-    
-    func postsWereUpdated()
+    var posts: [Post] = []
 }
