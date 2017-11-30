@@ -10,19 +10,21 @@ import Foundation
 
 class PostController {
     
-    static let shared = PostController()
+    static let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")
     
-    let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")
+    static let getterEndpoint = baseURL?.appendingPathExtension("json")
     
     // MARK: Request
     
     func fetchPosts(completion: @escaping() -> Void) {
         
-        guard let baseURL = baseURL else { fatalError("Post endpoint url failed") }
+        guard let requestURL = PostController.baseURL else { fatalError("Post endpoint url failed") }
         
-        let requestURL = baseURL.appendingPathExtension("json")
+        var request = URLRequest(url: requestURL)
+        request.httpBody = nil
+        request.httpMethod = "GET"
         
-        let dataTask = URLSession.shared.dataTask(with: requestURL, completionHandler: { (data, _, error) in
+        let dataTask = URLSession.shared.dataTask(with: request, completionHandler: { (data, _, error) in
             
             if let error = error {
                 NSLog("There was an error retrieving data in \(#function). Error: \(error)")
@@ -53,13 +55,13 @@ class PostController {
         
         guard let postData = try? JSONEncoder().encode(post) else { completion(); return }
         
-        guard let baseURL = self.baseURL else { completion(); return }
+        guard let baseURL = PostController.baseURL else { completion(); return }
         
-        let requestURL = baseURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathExtension("json")
         
         var request = URLRequest(url: requestURL)
         
-        request.httpMethod = "PUT"
+        request.httpMethod = "POST"
         
         request.httpBody = postData
         

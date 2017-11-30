@@ -10,6 +10,8 @@ import UIKit
 
 class PostListTableViewController: UITableViewController {
     
+    let postController = PostController()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -18,7 +20,7 @@ class PostListTableViewController: UITableViewController {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-        PostController.shared.fetchPosts {
+        postController.fetchPosts {
             self.reloadTableView()
         }
     }
@@ -34,10 +36,9 @@ class PostListTableViewController: UITableViewController {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-        PostController.shared.fetchPosts {
+        postController.fetchPosts {
             self.reloadTableView()
         }
-        
     }
     
     func reloadTableView() {
@@ -76,7 +77,7 @@ class PostListTableViewController: UITableViewController {
                     return
             }
             
-            PostController.shared.addPost(username: username, text: text, completion: {
+            self.postController.addPost(username: username, text: text, completion: {
                 self.reloadTableView()
             })
             
@@ -104,13 +105,13 @@ class PostListTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return PostController.shared.posts.count
+        return postController.posts.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "postCell", for: indexPath)
         
-        let post = PostController.shared.posts[indexPath.row]
+        let post = postController.posts[indexPath.row]
         
         cell.textLabel?.text = post.text
         cell.detailTextLabel?.text = "\(indexPath.row) - \(post.username) - \(Date(timeIntervalSince1970: post.timestamp))"
