@@ -22,5 +22,9 @@ struct Post: Codable {
 	let username: String  
 	let text: String
 	let timestamp: TimeInterval
+    
+    var queryTimestamp: TimeInterval {
+        return timestamp - 0.00001
+    }
 }
 

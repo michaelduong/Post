@@ -16,11 +16,28 @@ class PostController {
     
     // MARK: Request
     
-    func fetchPosts(completion: @escaping() -> Void) {
+    func fetchPosts(reset: Bool = true, completion: @escaping() -> Void) {
         
-        guard let requestURL = PostController.baseURL else { fatalError("Post endpoint url failed") }
+        let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970
         
-        var request = URLRequest(url: requestURL)
+        guard let baseURL = PostController.baseURL else { fatalError("Post endpoint url failed") }
+        
+        let urlParameters = [
+            "orderBy": "\"timestamp\"",
+            "endAt": "\(queryEndInterval)",
+            "limitToLast": "15",
+            ]
+        
+        let queryItems = urlParameters.flatMap( { URLQueryItem(name: $0.key, value: $0.value) } )
+        
+        var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)
+        urlComponents?.queryItems = queryItems
+        
+        guard let url = urlComponents?.url else { completion(); return }
+        
+        let getterEndpoint = url.appendingPathExtension("json")
+        
+        var request = URLRequest(url: getterEndpoint)
         request.httpBody = nil
         request.httpMethod = "GET"
         
@@ -39,7 +56,11 @@ class PostController {
                 let postsDictionary = try decoder.decode([String:Post].self, from: data)
                 let posts: [Post] = postsDictionary.flatMap( { $0.value })
                 let sortedPosts = posts.sorted(by: { $0.timestamp > $1.timestamp })
-                self.posts = sortedPosts
+                if reset {
+                    self.posts = sortedPosts
+                } else {
+                    self.posts.append(contentsOf: sortedPosts)
+                }
                 completion()
             } catch let error {
                 NSLog("ERROR decoding: \(error.localizedDescription)")
@@ -53,13 +74,22 @@ class PostController {
         
         let post = Post(username: username, text: text)
         
-        guard let postData = try? JSONEncoder().encode(post) else { completion(); return }
+        var postData: Data
+        
+        do {
+            let encoder = JSONEncoder()
+            postData = try encoder.encode(post)
+        } catch let error {
+            NSLog("ERROR encoding post to be saved: \(error.localizedDescription)")
+            completion()
+            return
+        }
         
         guard let baseURL = PostController.baseURL else { completion(); return }
         
-        let requestURL = baseURL.appendingPathExtension("json")
+        let postEndpoint = baseURL.appendingPathExtension("json")
         
-        var request = URLRequest(url: requestURL)
+        var request = URLRequest(url: postEndpoint)
         
         request.httpMethod = "POST"
         
@@ -80,6 +110,8 @@ class PostController {
             }
         }
         dataTask.resume()
+        
+        
     }
     
     // MARK: Properties

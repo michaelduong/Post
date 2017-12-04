@@ -12,6 +12,7 @@ class PostListTableViewController: UITableViewController {
     
     let postController = PostController()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -38,6 +39,9 @@ class PostListTableViewController: UITableViewController {
         
         postController.fetchPosts {
             self.reloadTableView()
+            DispatchQueue.main.async {
+                sender.endRefreshing()
+            }
         }
     }
     
@@ -117,5 +121,14 @@ class PostListTableViewController: UITableViewController {
         cell.detailTextLabel?.text = "\(indexPath.row) - \(post.username) - \(Date(timeIntervalSince1970: post.timestamp))"
         
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+
+        if indexPath.row >= postController.posts.count - 1 {
+            postController.fetchPosts(reset: false, completion: {
+                self.reloadTableView()
+            })
+        }
     }
 }
