@@ -10,17 +10,15 @@ import Foundation
 
 class PostController {
     
-    static let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")
+    static let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")!
     
-    static let getterEndpoint = baseURL?.appendingPathExtension("json")
+    static let getterEndpoint = baseURL.appendingPathExtension("json")
     
     // MARK: Request
     
     func fetchPosts(reset: Bool = true, completion: @escaping() -> Void) {
         
         let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970
-        
-        guard let baseURL = PostController.baseURL else { fatalError("Post endpoint url failed") }
         
         let urlParameters = [
             "orderBy": "\"timestamp\"",
@@ -30,7 +28,7 @@ class PostController {
         
         let queryItems = urlParameters.flatMap( { URLQueryItem(name: $0.key, value: $0.value) } )
         
-        var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)
+        var urlComponents = URLComponents(url: PostController.baseURL, resolvingAgainstBaseURL: true)
         urlComponents?.queryItems = queryItems
         
         guard let url = urlComponents?.url else { completion(); return }
@@ -85,9 +83,7 @@ class PostController {
             return
         }
         
-        guard let baseURL = PostController.baseURL else { completion(); return }
-        
-        let postEndpoint = baseURL.appendingPathExtension("json")
+        let postEndpoint = PostController.baseURL.appendingPathExtension("json")
         
         var request = URLRequest(url: postEndpoint)
         
@@ -110,8 +106,6 @@ class PostController {
             }
         }
         dataTask.resume()
-        
-        
     }
     
     // MARK: Properties
