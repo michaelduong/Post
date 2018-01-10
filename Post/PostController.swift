@@ -10,90 +10,105 @@ import Foundation
 
 class PostController {
     
-    static let shared = PostController()
+    static let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")!
     
-    let baseURL = URL(string: "https://devmtn-post.firebaseio.com/posts/")
-    
-    init() {
-        fetchPosts()
-    }
+    static let getterEndpoint = baseURL.appendingPathExtension("json")
     
     // MARK: Request
     
-    func fetchPosts() {
+    func fetchPosts(reset: Bool = true, completion: @escaping() -> Void) {
         
-        guard let baseURL = baseURL else { fatalError("Post endpoint url failed") }
+        let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970
         
-        let requestURL = baseURL.appendingPathExtension("json")
+        let urlParameters = [
+            "orderBy": "\"timestamp\"",
+            "endAt": "\(queryEndInterval)",
+            "limitToLast": "15",
+            ]
         
-        let dataTask = URLSession.shared.dataTask(with: requestURL, completionHandler: { (data, _, error) in
+        let queryItems = urlParameters.flatMap( { URLQueryItem(name: $0.key, value: $0.value) } )
+        
+        var urlComponents = URLComponents(url: PostController.baseURL, resolvingAgainstBaseURL: true)
+        urlComponents?.queryItems = queryItems
+        
+        guard let url = urlComponents?.url else { completion(); return }
+        
+        let getterEndpoint = url.appendingPathExtension("json")
+        
+        var request = URLRequest(url: getterEndpoint)
+        request.httpBody = nil
+        request.httpMethod = "GET"
+        
+        let dataTask = URLSession.shared.dataTask(with: request, completionHandler: { (data, _, error) in
             
-            guard let data = data, let responseDataString = String(data: data, encoding: .utf8) else {
-                NSLog("No data returned from data task")
+            if let error = error {
+                NSLog("There was an error retrieving data in \(#function). Error: \(error)")
+                completion()
                 return
             }
             
-            guard let postDictionaries = (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)) as? [String: [String: Any]] else {
-                
-                NSLog("Unable to deserialize JSON. \nResponse: \(responseDataString)")
-                return
+            guard let data = data else { NSLog("No data returned from data task."); completion();  return }
+            
+            do {
+                let decoder = JSONDecoder()
+                let postsDictionary = try decoder.decode([String:Post].self, from: data)
+                let posts: [Post] = postsDictionary.flatMap( { $0.value })
+                let sortedPosts = posts.sorted(by: { $0.timestamp > $1.timestamp })
+                if reset {
+                    self.posts = sortedPosts
+                } else {
+                    self.posts.append(contentsOf: sortedPosts)
+                }
+                completion()
+            } catch let error {
+                NSLog("ERROR decoding: \(error.localizedDescription)")
+                completion()
             }
-            
-            let posts = postDictionaries.flatMap { Post(json: $0.value, identifier: $0.key) }
-            
-            let sortedPosts = posts.sorted(by: { $0.timestamp > $1.timestamp })
-            
-            
-            self.posts = sortedPosts
-            
         })
-        
         dataTask.resume()
     }
     
-    func addPost(username: String, text: String) {
+    func addPost(username: String, text: String, completion: @escaping() -> Void) {
         
         let post = Post(username: username, text: text)
         
-        guard let baseURL = self.baseURL else { return }
+        var postData: Data
         
-        let requestURL = baseURL.appendingPathComponent(post.identifier.uuidString)
+        do {
+            let encoder = JSONEncoder()
+            postData = try encoder.encode(post)
+        } catch let error {
+            NSLog("ERROR encoding post to be saved: \(error.localizedDescription)")
+            completion()
+            return
+        }
         
-        var request = URLRequest(url: requestURL)
+        let postEndpoint = PostController.baseURL.appendingPathExtension("json")
         
-        request.httpMethod = "PUT"
+        var request = URLRequest(url: postEndpoint)
         
-        request.httpBody = post.jsonData
+        request.httpMethod = "POST"
+        
+        request.httpBody = postData
         
         let dataTask = URLSession.shared.dataTask(with: request) { (data, _, error) in
             
-            if let error = error { NSLog(error.localizedDescription) }
+            if let error = error { completion(); NSLog(error.localizedDescription) }
             
             guard let data = data,
-                let responseDataString = String(data: data, encoding: .utf8) else { NSLog("Data is nil. Unable to verify if data was able to be put to endpoint."); return }
+                let responseDataString = String(data: data, encoding: .utf8)
+                else { NSLog("Data is nil. Unable to verify if data was able to be put to endpoint.");
+                    completion()
+                    return }
             
-            
-            print("Successfully saved data to endpoint. \nResponse: \(responseDataString)")
-            
-            
-            self.fetchPosts()
+            self.fetchPosts {
+                completion()
+            }
         }
-        
         dataTask.resume()
     }
     
     // MARK: Properties
     
-    weak var delegate: PostControllerDelegate?
-    
-    var posts: [Post] = [] {
-        didSet {
-            delegate?.postsWereUpdated()
-        }
-    }
-}
-
-protocol PostControllerDelegate: class {
-    
-    func postsWereUpdated()
+    var posts: [Post] = []
 }

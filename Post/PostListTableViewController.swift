@@ -10,6 +10,9 @@ import UIKit
 
 class PostListTableViewController: UITableViewController {
     
+    let postController = PostController()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -18,17 +21,38 @@ class PostListTableViewController: UITableViewController {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-        PostController.shared.delegate = self
+        postController.fetchPosts {
+            self.reloadTableView()
+        }
     }
     
     // MARK: Actions
+    
+    @IBAction func addPostButtonTapped(_ sender: Any) {
+        
+        presentNewPostAlert()
+    }
     
     @IBAction func refreshControlPulled(_ sender: UIRefreshControl) {
         
         UIApplication.shared.isNetworkActivityIndicatorVisible = true
         
-        PostController.shared.fetchPosts()
+        postController.fetchPosts {
+            self.reloadTableView()
+            DispatchQueue.main.async {
+                sender.endRefreshing()
+            }
+        }
+    }
+    
+    func reloadTableView() {
         
+        DispatchQueue.main.async {
+
+            self.tableView.reloadData()
+            
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+        }
     }
     
     func presentNewPostAlert() {
@@ -57,7 +81,9 @@ class PostListTableViewController: UITableViewController {
                     return
             }
             
-            PostController.shared.addPost(username: username, text: text)
+            self.postController.addPost(username: username, text: text, completion: {
+                self.reloadTableView()
+            })
             
         }
         alertController.addAction(postAction)
@@ -83,31 +109,26 @@ class PostListTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return PostController.shared.posts.count
+        return postController.posts.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "postCell", for: indexPath)
         
-        let post = PostController.shared.posts[indexPath.row]
+        let post = postController.posts[indexPath.row]
         
         cell.textLabel?.text = post.text
         cell.detailTextLabel?.text = "\(indexPath.row) - \(post.username) - \(Date(timeIntervalSince1970: post.timestamp))"
         
         return cell
     }
-}
-
-// MARK: - PostControllerDelegate
-
-extension PostListTableViewController: PostControllerDelegate {
     
-    func postsWereUpdated() {
-        DispatchQueue.main.async {
-            
-            self.tableView.reloadData()
-            
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+
+        if indexPath.row >= postController.posts.count - 1 {
+            postController.fetchPosts(reset: false, completion: {
+                self.reloadTableView()
+            })
         }
     }
 }
