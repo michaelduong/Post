@@ -2,29 +2,27 @@
 //  Post.swift
 //  Post
 //
-//  Created by Caleb Hicks on 5/16/16.
-//  Copyright © 2016 DevMountain. All rights reserved.
+//  Created by Michael Duong on 1/29/18.
+//  Copyright © 2018 Turnt Labs. All rights reserved.
 //
 
 import Foundation
 
 struct Post: Codable {
-	
+    var username: String
+    var text: String
+    var timestamp: TimeInterval
+    
     init(username: String, text: String, timestamp: TimeInterval = Date().timeIntervalSince1970) {
-
         self.username = username
         self.text = text
         self.timestamp = timestamp
     }
-	
-	// MARK: Properties
-	
-	let username: String  
-	let text: String
-	let timestamp: TimeInterval
     
     var queryTimestamp: TimeInterval {
         return timestamp - 0.00001
     }
+    
 }
+
 

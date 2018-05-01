@@ -2,21 +2,21 @@
 //  PostController.swift
 //  Post
 //
-//  Created by Caleb Hicks on 5/16/16.
-//  Copyright © 2016 DevMountain. All rights reserved.
+//  Created by Michael Duong on 1/29/18.
+//  Copyright © 2018 Turnt Labs. All rights reserved.
 //
 
 import Foundation
 
 class PostController {
     
-    static let baseURL = URL(string: "https://dm-post.firebaseio.com/posts/")!
+    static let shared = PostController()
     
-    static let getterEndpoint = baseURL.appendingPathExtension("json")
+    var posts = [Post]()
     
-    // MARK: Request
+    let baseURL = URL(string: "https://ct-posts.firebaseio.com/posts")!
     
-    func fetchPosts(reset: Bool = true, completion: @escaping() -> Void) {
+    func fetchPosts(reset: Bool = true, completion: @escaping(_ success: Bool) -> Void) {
         
         let queryEndInterval = reset ? Date().timeIntervalSince1970 : posts.last?.queryTimestamp ?? Date().timeIntervalSince1970
         
@@ -28,47 +28,45 @@ class PostController {
         
         let queryItems = urlParameters.flatMap( { URLQueryItem(name: $0.key, value: $0.value) } )
         
-        var urlComponents = URLComponents(url: PostController.baseURL, resolvingAgainstBaseURL: true)
+        var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)
         urlComponents?.queryItems = queryItems
         
-        guard let url = urlComponents?.url else { completion(); return }
+        guard let url = urlComponents?.url else { return }
         
-        let getterEndpoint = url.appendingPathExtension("json")
+        let getterEndPoint = url.appendingPathExtension("json")
         
-        var request = URLRequest(url: getterEndpoint)
+        var request = URLRequest(url: getterEndPoint)
         request.httpBody = nil
         request.httpMethod = "GET"
         
-        let dataTask = URLSession.shared.dataTask(with: request, completionHandler: { (data, _, error) in
+        URLSession.shared.dataTask(with: request) { (data, _, error) in
             
             if let error = error {
-                NSLog("There was an error retrieving data in \(#function). Error: \(error)")
-                completion()
-                return
+                print("Error retrieveing data in \(#function). Error: \(error)")
+                completion(false);return
             }
             
-            guard let data = data else { NSLog("No data returned from data task."); completion();  return }
-            
-            do {
-                let decoder = JSONDecoder()
-                let postsDictionary = try decoder.decode([String:Post].self, from: data)
-                let posts: [Post] = postsDictionary.flatMap( { $0.value })
-                let sortedPosts = posts.sorted(by: { $0.timestamp > $1.timestamp })
-                if reset {
-                    self.posts = sortedPosts
-                } else {
+            if let data = data {
+                
+                do {
+                    let jsonDecoder = JSONDecoder()
+                    let postsDictionary = try jsonDecoder.decode([String:Post].self, from: data)
+                    let results = postsDictionary.flatMap{$0.value}
+                    let sortedPosts = results.sorted(by: { (lhs, rhs) -> Bool in
+                        lhs.timestamp > rhs.timestamp
+                    })
                     self.posts.append(contentsOf: sortedPosts)
+                    completion(true)
+                    
+                } catch let error {
+                    print("Error decoding: \(error.localizedDescription)")
+                    completion(false)
                 }
-                completion()
-            } catch let error {
-                NSLog("ERROR decoding: \(error.localizedDescription)")
-                completion()
             }
-        })
-        dataTask.resume()
+            }.resume()
     }
     
-    func addPost(username: String, text: String, completion: @escaping() -> Void) {
+    func addNewPostWith(username: String, text: String, completion: @escaping( _ success: Bool) -> Void) {
         
         let post = Post(username: username, text: text)
         
@@ -77,38 +75,33 @@ class PostController {
         do {
             let encoder = JSONEncoder()
             postData = try encoder.encode(post)
+            
         } catch let error {
-            NSLog("ERROR encoding post to be saved: \(error.localizedDescription)")
-            completion()
-            return
+            print("Error encoding data \(error) \(error.localizedDescription)")
+            completion(false); return
         }
         
-        let postEndpoint = PostController.baseURL.appendingPathExtension("json")
+        let postEndpoint = baseURL.appendingPathExtension("json")
         
         var request = URLRequest(url: postEndpoint)
-        
+        request.httpBody = postData
         request.httpMethod = "POST"
         
-        request.httpBody = postData
-        
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, _, error) in
+        URLSession.shared.dataTask(with: request) { (data, _, error) in
             
-            if let error = error { completion(); NSLog(error.localizedDescription) }
-            
-            guard let data = data,
-                let responseDataString = String(data: data, encoding: .utf8)
-                else { NSLog("Data is nil. Unable to verify if data was able to be put to endpoint.");
-                    completion()
-                    return }
-            
-            self.fetchPosts {
-                completion()
+            if let error = error {
+                print("Error with data request \(error) \(error.localizedDescription)")
+                completion(false); return
             }
-        }
-        dataTask.resume()
+            
+            guard let data = data, let responseData = String(data: data, encoding: .utf8) else { return }
+            print(responseData)
+            
+//            self.posts.append(post)
+//            completion(true)
+            self.fetchPosts {_ in
+                completion(true)
+            }
+        }.resume()
     }
-    
-    // MARK: Properties
-    
-    var posts: [Post] = []
 }
